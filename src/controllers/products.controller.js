@@ -9,6 +9,15 @@ const getProducts = async(req,res) => {
     return res.sendPayload(null,result);
 }
 
+const getProductById = async(req,res) => {
+    const data = req.params;
+    const result = await ProductsService.getProductById(data.pid);
+    if(!result){
+        return res.sendServerError("Could not get product");
+    }
+    return res.sendPayload(null,result);
+}
+
 const createProduct = async(req,res) => {
     const data = req.body;
     const newProduct = {
@@ -21,7 +30,7 @@ const createProduct = async(req,res) => {
         status: data.status || true
     }
     const exists = await ProductsService.searchProduct({ code: newProduct.code });
-    if (exists) {
+    if (exists.lenght>1) {
         return res.sendBadRequest("El producto ya existe");
     }else {
         const product = await ProductsService.createProduct(newProduct);
@@ -64,5 +73,6 @@ export default {
     createProduct,
     deleteProduct,
     getProducts,
+    getProductById,
     updateProduct
 }
