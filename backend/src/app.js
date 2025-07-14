@@ -6,7 +6,7 @@ import __dirname from './utils.js';
 import ProductsRouter from "./routes/ProductsRouter.js";
 
 const app = express();
-const PORT = process.env.PORT||8080;
+const PORT = process.env.PORT||3000;
 app.listen(PORT, ()=>console.log("server running."));
 
 const connection = mongoose.connect(process.env.MONGO_URL);

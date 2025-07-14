@@ -6,7 +6,7 @@ const getProducts = async(req,res) => {
     if(!result){
         return res.sendServerError("Could not get products");
     }
-    return res.sendPayload(null,result);
+    return res.send(result);
 }
 
 const getProductById = async(req,res) => {
