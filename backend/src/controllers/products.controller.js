@@ -4,16 +4,23 @@ import { ProductsService } from "../services/repositories.js";
 const getProducts = async(req,res) => {
     const result = await ProductsService.getProducts();
     if(!result){
-        return res.sendServerError("Could not get products");
+        return res.sendServerError("No se consiguieron productos");
     }
     return res.sendPayload(null,result);
 }
-
+const getProductsByCategory = async(req,res) => {
+    const data = req.params;
+    const result = await ProductsService.getProductsByCategory(data.category.toString());
+    if(!result){
+        return res.sendServerError("No se consiguieron productos");
+    }
+    return res.sendPayload(null,result);
+}
 const getProductById = async(req,res) => {
     const data = req.params;
     const result = await ProductsService.getProductById(data.pid);
     if(!result){
-        return res.sendServerError("Could not get product");
+        return res.sendServerError("No se consiguieron productos");
     }
     return res.sendPayload(null,result);
 }
@@ -35,9 +42,9 @@ const createProduct = async(req,res) => {
     }else {
         const product = await ProductsService.createProduct(newProduct);
         if (!product) {
-            return res.sendServerError("Could not create product");
+            return res.sendServerError("No se pudo crear el producto");
         }
-        return res.sendPayload("Product created successfully", product);
+        return res.sendPayload("Producto creado con exito", product);
     }
 }
 
@@ -55,24 +62,25 @@ const updateProduct = async(req,res) => {
     }
     const updatedProduct = await ProductsService.updateProduct(pid, update);
     if (!updatedProduct) {
-        return res.sendServerError("Could not update product");
+        return res.sendServerError("No se pudo actualizar el producto");
     }
-    return res.sendPayload("Product updated successfully", updateProduct);
+    return res.sendPayload("Producto actualizado exitosamente", updateProduct);
 }
 
 const deleteProduct = async(req,res) => {
     const pid = req.params.pid;
     const result = await ProductsService.deleteProduct(pid);
     if(!result){
-        return res.sendServerError("Could not delete product");
+        return res.sendServerError("No se pudo eliminar el producto");
     }
-    return res.sendPayload("Product deleted successfully");
+    return res.sendPayload("Producto eliminado con exito");
 }
 
 export default {
     createProduct,
     deleteProduct,
     getProducts,
+    getProductsByCategory,
     getProductById,
     updateProduct
 }

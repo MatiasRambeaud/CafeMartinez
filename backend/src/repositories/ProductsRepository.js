@@ -3,11 +3,11 @@ export default class ProductsRepository {
         this.dao = dao;
     }
 
-    getProducts(p) {
-        return this.dao.get(p);
+    getProducts() {
+        return this.dao.get();
     }
     getProductsByCategory(category) {
-        return this.dao.get({ category: category });
+        return this.dao.getOne({ category: category });
     }
     getProductById(id) {
         return this.dao.getById({ _id: id });

@@ -29,9 +29,9 @@ export default class BaseRouter {
 
     sendResponses(req,res,next){
         res.sendSuccess = (message) => res.status(200).send({status:"success",message});
-        res.sendBadRequest = (message) => res.status(400).send({status:"success",error:message||"Bad request"});
-        res.sendUnauthorized = (message) => res.status(401).send({status:"error",error:message||"Unauthorized"});
-        res.sendServerError = (message) => res.status(500).send({status:"error", error:message||"Server error"})
+        res.sendBadRequest = (message) => res.status(400).send({status:"success",error:message||"Solicitud incorrecta"});
+        res.sendUnauthorized = (message) => res.status(401).send({status:"error",error:message||"No autorizado"});
+        res.sendServerError = (message) => res.status(500).send({status:"error", error:message||"Error interno del servidor"})
         res.sendPayload = (message, payload) => res.status(200).send({status:"success",message, payload});
         next();
     }

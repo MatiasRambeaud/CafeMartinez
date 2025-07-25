@@ -5,6 +5,7 @@ import productsController from "../controllers/products.controller.js";
 class ProductsRouter extends BaseRouter {
     init(){
         this.get("/",productsController.getProducts);
+        this.get("/categoria/:category",productsController.getProductsByCategory);
         this.get("/:pid",productsController.getProductById);
         this.post("/",productsController.createProduct);
         this.put("/:pid",productsController.updateProduct);
