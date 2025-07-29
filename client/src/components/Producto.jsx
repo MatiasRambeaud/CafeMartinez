@@ -9,52 +9,49 @@ export default function Producto({ producto }) {
       <div className="producto-info">
         <h3 className="producto-titulo">{producto.title}</h3>
         <p className="producto-descripcion">{producto.description}</p>
-        <p className="producto-precio">Precio: <strong>${producto.price}</strong></p>
+        <p className="producto-precio">${producto.price.toFixed(2)}</p>
       </div>
 
       <style>{`
         .producto-card {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          border: 1px solid #ddd;
-          border-radius: 10px;
-          padding: 15px;
-          max-width: 300px;
-          background: #fffbea;
-          transition: transform 0.2s ease;
-          cursor: pointer;
+          background-color: #fff;
+          border: 1px solid #f0e1c0;
+          border-radius: 16px;
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+          overflow: hidden;
+          transition: transform 0.3s ease;
+          width: 100%;
+          box-sizing: border-box;
         }
         .producto-card:hover {
-          transform: scale(1.01);
+          transform: translateY(-5px);
         }
         .producto-imagen {
           width: 100%;
-          height: 180px;
+          height: 220px;
           object-fit: cover;
-          border-radius: 10px;
-          margin-bottom: 12px;
         }
         .producto-info {
+          padding: 20px;
           text-align: center;
         }
         .producto-titulo {
-          font-size: 1.3rem;
-          margin: 0 0 8px;
-          color: #d35400;
-          text-transform: uppercase;
-          letter-spacing: 1px;
+          font-size: 1.6rem;
+          margin-bottom: 10px;
+          color: #6e3708;
+          font-family: 'Georgia', serif;
         }
         .producto-descripcion {
-          font-size: 0.9rem;
+          font-size: 1rem;
           color: #555;
-          margin-bottom: 10px;
-          min-height: 48px;
+          margin-bottom: 14px;
+          font-style: italic;
         }
         .producto-precio {
-          font-size: 1.1rem;
-          color: #27ae60;
-          font-weight: bold;
+          font-size: 1.2rem;
+          color: #152e16ff;
+          font-weight: 600;
+          font-family: 'Segoe UI', sans-serif;
         }
       `}</style>
     </div>
