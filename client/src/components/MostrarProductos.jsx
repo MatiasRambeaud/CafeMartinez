@@ -4,14 +4,10 @@ import Producto from "./Producto";
 export default function MostrarProductos() {
   const [productos, setProductos] = useState([]);
 
-  const getProducts = () => {
+  useEffect(() => {
     fetch("/api/products")
       .then((res) => res.json())
       .then((json) => setProductos(json.payload));
-  };
-
-  useEffect(() => {
-    getProducts();
   }, []);
 
   const productosPorCategoria = productos.reduce((acc, producto) => {
@@ -20,18 +16,35 @@ export default function MostrarProductos() {
     return acc;
   }, {});
 
+  const scrollToCategoria = (id) => {
+    const section = document.getElementById(id);
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <>
-      <header className="menu-header">
-        <div className="logo-area">
-          {/* Reemplazá esto por una <img src="logo.png" /> si tenés el logo */}
-          <h1 className="titulo-cafe">Café Martínez</h1>
-        </div>
-      </header>
-
       <div className="menu-container">
+        <header className="header">
+          <img src="/images/logo.png" alt="Café Martínez" className="logo" />
+          <h1 className="titulo">Café Martínez</h1>
+        </header>
+
+        <nav className="categoria-nav">
+          {Object.keys(productosPorCategoria).map((categoria) => (
+            <button
+              key={categoria}
+              className="categoria-btn"
+              onClick={() => scrollToCategoria(categoria)}
+            >
+              {categoria}
+            </button>
+          ))}
+        </nav>
+
         {Object.entries(productosPorCategoria).map(([categoria, items]) => (
-          <section key={categoria} className="categoria-section">
+          <section key={categoria} id={categoria} className="categoria-section">
             <h2 className="categoria-titulo">{categoria}</h2>
             <div className="menu-grid">
               {items.map((producto) => (
@@ -43,40 +56,58 @@ export default function MostrarProductos() {
       </div>
 
       <style>{`
-        body {
-          margin: 0;
-          background-color: #1e1e1e;
-        }
-
-        .menu-header {
-          background-color: #141414;
-          padding: 20px;
-          text-align: center;
-          border-bottom: 2px solid #c59d5f;
-        }
-
-        .logo-area {
-          height: 80px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .titulo-cafe {
-          font-family: 'Georgia', serif;
-          color: #f5f5f5;
-          font-size: 2.4rem;
-          margin: 0;
-          letter-spacing: 1px;
-        }
-
         .menu-container {
           max-width: 480px;
           margin: 0 auto;
-          padding: 24px 16px;
+          padding: 20px 16px;
           font-family: 'Georgia', serif;
-          background-color: #1e1e1e;
-          color: #f0f0f0;
+          background-color: #1f1a17;
+          color: #f7f7f7;
+        }
+
+        .header {
+          text-align: center;
+          margin-bottom: 16px;
+        }
+
+        .logo {
+          width: 100%;
+          max-width: 220px;
+          margin-bottom: 8px;
+        }
+
+        .titulo {
+          font-size: 2.2rem;
+          color: #d4af37;
+          margin-bottom: 12px;
+        }
+
+        .categoria-nav {
+          display: flex;
+          overflow-x: auto;
+          gap: 12px;
+          padding: 16px 0;
+          margin-bottom: 24px;
+          justify-content: center;
+        }
+
+        .categoria-btn {
+          flex: 0 0 auto;
+          padding: 10px 20px;
+          font-size: 1rem;
+          font-weight: 600;
+          background: linear-gradient(135deg, #d4af37, #c49000);
+          color: #1f1a17;
+          border: none;
+          border-radius: 30px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+          cursor: pointer;
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .categoria-btn:hover {
+          transform: scale(1.05);
+          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
         }
 
         .categoria-section {
@@ -84,10 +115,8 @@ export default function MostrarProductos() {
         }
 
         .categoria-titulo {
-          font-size: 2rem;
-          color: #f5f5f5;
-          border-bottom: 2px solid #c59d5f;
-          padding-bottom: 10px;
+          font-size: 1.6rem;
+          color: #d4af37;
           margin-bottom: 20px;
           text-align: center;
           text-transform: capitalize;
@@ -96,7 +125,7 @@ export default function MostrarProductos() {
         .menu-grid {
           display: flex;
           flex-direction: column;
-          gap: 24px;
+          gap: 16px;
         }
       `}</style>
     </>
