@@ -1,0 +1,32 @@
+{
+  "name": "cafe-martinez",
+  "version": "1.0.0",
+  "description": "Cafe Martinez",
+  "main": "src/app.js",
+  "type": "module",
+  "author": "Matias Rambeaud",
+  "license": "ISC",
+  "private": true,
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node src/app.js",
+    "server": "nodemon src/app.js",
+    "client": "cd client && npm start && y",
+    "client:build": "cd client && npm run build",
+    "client:test": "cd client && npm test",
+    "client:eject": "cd client && npm run eject",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.4.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0",
+    "concurrently": "^8.2.2"
+  }
+}
