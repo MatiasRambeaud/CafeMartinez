@@ -233,8 +233,8 @@ const AdminPanel = () => {
                       onChange={handleChange("status")}
                     />
                   </label>
-                  <button onClick={handleSave}>Guardar</button>
-                  <button onClick={handleCancelEdit} className="cancel">
+                  <button onClick={handleSave} style={{ backgroundColor: "#28a745", color: "white" }}>Guardar</button>
+                  <button onClick={handleCancelEdit}className="cancel">
                     Cancelar
                   </button>
                 </div>
@@ -277,7 +277,7 @@ const AdminPanel = () => {
         }
         .product-actions button { background-color: #28a745; color: white; }
         .product-actions .delete { background-color: #dc3545; }
-        .product-edit .cancel { background-color: gray; color: white; }
+        .product-edit .cancel { background-color: #dc3545; color: white; }
         .create-product-form { background-color: #f4f4f4; padding: 20px; margin-bottom: 30px; border-radius: 8px; }
         .create-product-form h2 { margin-bottom: 15px; color: #333; }
         .create-product-form form { display: flex; flex-direction: column; gap: 10px; }
