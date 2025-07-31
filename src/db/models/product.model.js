@@ -6,12 +6,19 @@ const schema = new mongoose.Schema({
     title:String,
     description:String,
     code:String,
-    price:Number,
+    price:{
+        type:Number,
+        default:0
+    },
     category:String,
     image:String,
     status:{
         type:Boolean,
         default:true
+    },
+    variations:{
+        type:Array,
+        default:null
     }
 })
 

@@ -1,5 +1,6 @@
 export default function Producto({ producto }) {
   const tieneImagen = producto.image && producto.image.trim() !== "";
+  const tieneVariaciones = producto.variations && producto.variations.length > 0;
 
   return (
     <div className={`producto-card ${tieneImagen ? "con-imagen" : "sin-imagen"}`}>
@@ -10,11 +11,38 @@ export default function Producto({ producto }) {
           className="producto-imagen"
         />
       )}
-      <div className="producto-info">
-        <h3 className="producto-titulo">{producto.title}</h3>
-        <p className="producto-descripcion">{producto.description}</p>
+      <div
+        className="producto-info"
+        style={tieneVariaciones ? { fontSize: "1.1rem", fontWeight: "600" } : {}}
+      >
+        <h3
+          className="producto-titulo"
+          style={tieneVariaciones ? { fontSize: "1.4rem", fontWeight: "700" } : {}}
+        >
+          {producto.title}
+        </h3>
+        <p
+          className="producto-descripcion"
+          style={tieneVariaciones ? { fontSize: "1.05rem" } : {}}
+        >
+          {producto.description}
+        </p>
         <hr className="linea-precio" />
-        <p className="producto-precio">${producto.price.toFixed(2)}</p>
+
+        {!tieneVariaciones && (
+          <p className="producto-precio">${producto.price.toFixed(2)}</p>
+        )}
+
+        {tieneVariaciones && (
+          <ul className="producto-variaciones-horizontal">
+            {producto.variations.map((v, i) => (
+              <li key={i} className="variacion-item">
+                <div className="nombre-variacion">{v.nombre}</div>
+                <div className="precio-variacion">${Number(v.precio).toFixed(2)}</div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <style>{`
@@ -57,6 +85,7 @@ export default function Producto({ producto }) {
           flex-direction: column;
           justify-content: center;
           flex: 1;
+          color: #f8f8f8;
         }
 
         .producto-titulo {
@@ -86,6 +115,53 @@ export default function Producto({ producto }) {
           font-weight: bold;
           font-family: 'Segoe UI', sans-serif;
           margin: 0;
+        }
+
+        .producto-variaciones-horizontal {
+          display: flex;
+          gap: 20px;
+          margin-top: 8px;
+          padding-left: 0;
+          list-style: none;
+          color: #e3c46b;
+          font-size: 1rem;
+          font-weight: 600;
+          overflow-x: auto;
+          white-space: nowrap;
+          justify-content: center; /* Centra horizontalmente */
+          align-items: center; /* Centra verticalmente */
+        }
+
+        .producto-variaciones-horizontal::-webkit-scrollbar {
+          height: 6px;
+        }
+        .producto-variaciones-horizontal::-webkit-scrollbar-thumb {
+          background-color: #bfa742;
+          border-radius: 3px;
+        }
+
+        .variacion-item {
+          display: flex;
+          flex-direction: column;
+          min-width: 100px;
+          padding: 6px 10px;
+          text-align: center;
+          box-sizing: border-box;
+          /* Sin fondo */
+          background: none;
+        }
+
+        .nombre-variacion {
+          font-weight: 700;
+          margin-bottom: 4px;
+          color: #f8f8f8;
+          font-size: 1.1rem;
+        }
+
+        .precio-variacion {
+          font-weight: 600;
+          color: #d4af37;
+          font-size: 1rem;
         }
       `}</style>
     </div>

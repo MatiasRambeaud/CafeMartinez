@@ -9,13 +9,14 @@ const AdminPanel = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [simpleView, setSimpleView] = useState(false);
   const [priceEdits, setPriceEdits] = useState({});
+  const [variations, setVariaciones] = useState([]);
 
   const fetchProducts = async () => {
     try {
       const res = await fetch(API_BASE);
       const data = await res.json();
       setProducts(data.payload || []);
-    } catch (err) {
+    } catch {
       alert("Error al obtener productos");
     }
   };
@@ -33,7 +34,7 @@ const AdminPanel = () => {
 
   const handleEditClick = (product) => {
     setEditingId(product._id);
-    setEditedProduct({ ...product });
+    setEditedProduct({ ...product, variations: product.variations || [] });
   };
 
   const handleCancelEdit = () => {
@@ -45,22 +46,24 @@ const AdminPanel = () => {
     try {
       await fetch(`${API_BASE}/${editingId}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editedProduct),
       });
       setEditingId(null);
       setEditedProduct(null);
       fetchProducts();
-    } catch (err) {
+    } catch {
       alert("Error al actualizar producto");
     }
   };
 
   const handleChange = (field) => (e) => {
     const value = field === "status" ? e.target.checked : e.target.value;
-    setEditedProduct((prev) => ({ ...prev, [field]: value }));
+    if (field === "price") {
+      setEditedProduct((prev) => ({ ...prev, [field]: Number(value) }));
+    } else {
+      setEditedProduct((prev) => ({ ...prev, [field]: value }));
+    }
   };
 
   const handlePriceChange = (id, value) => {
@@ -120,6 +123,7 @@ const AdminPanel = () => {
                 code: e.target.code.value,
                 image: e.target.image.value,
                 status: e.target.status.checked,
+                variations: variations,
               };
               await fetch(API_BASE, {
                 method: "POST",
@@ -127,29 +131,78 @@ const AdminPanel = () => {
                 body: JSON.stringify(nuevoProducto),
               });
               e.target.reset();
+              setVariaciones([]);
               fetchProducts();
-            } catch (err) {
+            } catch {
               alert("Error al crear producto");
             }
           }}
         >
           <input name="title" placeholder="Nombre" required />
           <textarea name="description" placeholder="Descripción" required />
-          <input name="price" type="number" placeholder="Precio" step="0.01" required />
+          <input
+            name="price"
+            type="number"
+            placeholder="Precio"
+            step="0.01"
+            required
+          />
           <input name="category" placeholder="Categoría" required />
           <input name="code" placeholder="Código" required />
-          <input name="image" placeholder="Nombre de imagen (ej. pizza.jpg)" />
+          <input name="image" placeholder="Imagen (ej. pizza.jpg)" />
           <label>
             Activo:
             <input name="status" type="checkbox" defaultChecked />
           </label>
+
+          <div>
+            <h3>Variaciones</h3>
+            {variations.map((v, i) => (
+              <div
+                key={i}
+                style={{ display: "flex", gap: "10px", marginBottom: "8px" }}
+              >
+                <input
+                  type="text"
+                  placeholder="Nombre variación"
+                  value={v.nombre}
+                  onChange={(e) => {
+                    const nuevas = [...variations];
+                    nuevas[i].nombre = e.target.value;
+                    setVariaciones(nuevas);
+                  }}
+                />
+                <input
+                  type="number"
+                  placeholder="Precio"
+                  value={v.precio}
+                  onChange={(e) => {
+                    const nuevas = [...variations];
+                    nuevas[i].precio = Number(e.target.value);
+                    setVariaciones(nuevas);
+                  }}
+                />
+                <button type="button" onClick={() => {
+                  const nuevas = [...variations];
+                  nuevas.splice(i, 1);
+                  setVariaciones(nuevas);
+                }}>
+                  ❌
+                </button>
+              </div>
+            ))}
+            <button type="button" onClick={() => setVariaciones([...variations, { nombre: "", precio: 0 }])}>
+              Agregar variación
+            </button>
+          </div>
+
           <button type="submit">Crear producto</button>
         </form>
       </div>
 
       <input
         type="text"
-        placeholder="Buscar por nombre, categoría o código"
+        placeholder="Buscar..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         style={{
@@ -182,108 +235,272 @@ const AdminPanel = () => {
         <div key={category} className="category-section">
           <h2 className="category-title">{category}</h2>
           <div className="product-list">
-            {items.map((p) =>
-              simpleView ? (
-                <div key={p._id} className="product-simple-card">
-                  <span className="product-name">{p.title}</span>
-                  <input
-                    type="number"
-                    value={priceEdits[p._id] ?? p.price}
-                    onChange={(e) => handlePriceChange(p._id, e.target.value)}
-                    style={{ width: "100px", marginRight: "10px", padding: "4px" }}
-                  />
-                  <button onClick={() => handleSavePrice(p._id)}>Guardar</button>
-                </div>
-              ) : editingId === p._id ? (
-                <div className="product-edit" key={p._id}>
-                  <input
-                    type="text"
-                    value={editedProduct.title}
-                    onChange={handleChange("title")}
-                  />
-                  <textarea
-                    value={editedProduct.description}
-                    onChange={handleChange("description")}
-                  />
-                  <input
-                    type="text"
-                    value={editedProduct.code}
-                    onChange={handleChange("code")}
-                  />
-                  <input
-                    type="number"
-                    value={editedProduct.price}
-                    onChange={handleChange("price")}
-                  />
-                  <input
-                    type="text"
-                    value={editedProduct.image}
-                    onChange={handleChange("image")}
-                  />
-                  <input
-                    type="text"
-                    value={editedProduct.category}
-                    onChange={handleChange("category")}
-                  />
-                  <label>
-                    Activo:
+            {items.map((p) => {
+              const isEditing = editingId === p._id;
+
+              if (simpleView) {
+                return (
+                  <div key={p._id} className="product-simple-card">
+                    <span className="product-name">{p.title}</span>
                     <input
-                      type="checkbox"
-                      checked={editedProduct.status}
-                      onChange={handleChange("status")}
+                      type="number"
+                      value={priceEdits[p._id] ?? p.price}
+                      onChange={(e) => handlePriceChange(p._id, e.target.value)}
+                      style={{ width: "100px", marginRight: "10px", padding: "4px" }}
                     />
-                  </label>
-                  <button onClick={handleSave} style={{ backgroundColor: "#28a745", color: "white" }}>Guardar</button>
-                  <button onClick={handleCancelEdit}className="cancel">
-                    Cancelar
-                  </button>
-                </div>
-              ) : (
+                    <button onClick={() => handleSavePrice(p._id)}>Guardar</button>
+                  </div>
+                );
+              }
+
+              if (isEditing) {
+                return (
+                  <div className="product-info" key={p._id}>
+                    <h3>
+                      <input
+                        type="text"
+                        value={editedProduct.title}
+                        onChange={(e) => handleChange("title")(e)}
+                        style={{
+                          fontSize: "1.3em",
+                          fontWeight: "bold",
+                          width: "100%",
+                          boxSizing: "border-box",
+                          borderRadius: "4px",
+                          border: "1px solid #ccc",
+                          padding: "6px",
+                        }}
+                      />
+                    </h3>
+                    <p>
+                      <textarea
+                        value={editedProduct.description}
+                        onChange={(e) => handleChange("description")(e)}
+                        style={{
+                          width: "100%",
+                          minHeight: "60px",
+                          boxSizing: "border-box",
+                          borderRadius: "4px",
+                          border: "1px solid #ccc",
+                          padding: "6px",
+                          resize: "vertical",
+                        }}
+                      />
+                    </p>
+                    <p>
+                      <strong>Precio: </strong>
+                      <input
+                        type="number"
+                        value={editedProduct.price}
+                        onChange={(e) => handleChange("price")(e)}
+                        step="0.01"
+                        style={{
+                          width: "100px",
+                          boxSizing: "border-box",
+                          borderRadius: "4px",
+                          border: "1px solid #ccc",
+                          padding: "4px",
+                        }}
+                      />
+                    </p>
+                    <p>
+                      <strong>Categoría: </strong>
+                      <input
+                        type="text"
+                        value={editedProduct.category}
+                        onChange={(e) => handleChange("category")(e)}
+                        style={{
+                          width: "200px",
+                          boxSizing: "border-box",
+                          borderRadius: "4px",
+                          border: "1px solid #ccc",
+                          padding: "4px",
+                        }}
+                      />
+                    </p>
+                    <p>
+                      <strong>Código: </strong>
+                      <input
+                        type="text"
+                        value={editedProduct.code}
+                        onChange={(e) => handleChange("code")(e)}
+                        style={{
+                          width: "150px",
+                          boxSizing: "border-box",
+                          borderRadius: "4px",
+                          border: "1px solid #ccc",
+                          padding: "4px",
+                        }}
+                      />
+                    </p>
+                    <p>
+                      <strong>Imagen: </strong>
+                      <input
+                        type="text"
+                        value={editedProduct.image}
+                        onChange={(e) => handleChange("image")(e)}
+                        placeholder="ej. pizza.jpg"
+                        style={{
+                          width: "200px",
+                          boxSizing: "border-box",
+                          borderRadius: "4px",
+                          border: "1px solid #ccc",
+                          padding: "4px",
+                        }}
+                      />
+                    </p>
+                    <p>
+                      <label style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                        <input
+                          type="checkbox"
+                          checked={editedProduct.status}
+                          onChange={(e) => handleChange("status")(e)}
+                        />
+                        Activo
+                      </label>
+                    </p>
+
+                    <div>
+                      <strong>Variaciones:</strong>
+                      {(editedProduct.variations?.length || 0) === 0 && (
+                        <p>No tiene variaciones</p>
+                      )}
+                      {(editedProduct.variations || []).map((v, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            display: "flex",
+                            gap: "8px",
+                            marginTop: "6px",
+                            alignItems: "center",
+                          }}
+                        >
+                          <input
+                            type="text"
+                            placeholder="Nombre variación"
+                            value={v.nombre}
+                            onChange={(e) => {
+                              const nuevasVar = [...editedProduct.variations];
+                              nuevasVar[i] = { ...nuevasVar[i], nombre: e.target.value };
+                              setEditedProduct((prev) => ({
+                                ...prev,
+                                variations: nuevasVar,
+                              }));
+                            }}
+                            style={{ flex: "1" }}
+                          />
+                          <input
+                            type="number"
+                            placeholder="Precio"
+                            value={v.precio}
+                            onChange={(e) => {
+                              const nuevasVar = [...editedProduct.variations];
+                              nuevasVar[i] = {
+                                ...nuevasVar[i],
+                                precio: Number(e.target.value),
+                              };
+                              setEditedProduct((prev) => ({
+                                ...prev,
+                                variations: nuevasVar,
+                              }));
+                            }}
+                            style={{ width: "80px" }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const nuevasVar = [...editedProduct.variations];
+                              nuevasVar.splice(i, 1);
+                              setEditedProduct((prev) => ({
+                                ...prev,
+                                variations: nuevasVar,
+                              }));
+                            }}
+                          >
+                            ❌
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const nuevasVar = [
+                            ...(editedProduct.variations || []),
+                            { nombre: "", precio: 0 },
+                          ];
+                          setEditedProduct((prev) => ({
+                            ...prev,
+                            variations: nuevasVar,
+                          }));
+                        }}
+                        style={{ marginTop: "8px" }}
+                      >
+                        Agregar variación
+                      </button>
+                    </div>
+
+                    <div className="product-actions" style={{ marginTop: "12px" }}>
+                      <button onClick={handleSave}>Guardar</button>
+                      <button
+                        onClick={handleCancelEdit}
+                        className="delete"
+                        style={{ marginLeft: "10px" }}
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
                 <div className="product-info" key={p._id}>
                   <h3>{p.title}</h3>
                   <p>{p.description}</p>
-                  <p><strong>Código:</strong> {p.code}</p>
-                  <p><strong>Precio:</strong> ${p.price}</p>
-                  <p><strong>Estado:</strong> {p.status ? "Activo" : "Inactivo"}</p>
+                  <p>
+                    <strong>Precio:</strong> ${p.price}
+                  </p>
+                  {p.variations?.length > 0 && (
+                    <div>
+                      <strong>Variaciones:</strong>
+                      <ul>
+                        {p.variations.map((v, i) => (
+                          <li key={i}>
+                            {v.nombre} - ${v.precio}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                   <div className="product-actions">
                     <button onClick={() => handleEditClick(p)}>Editar</button>
-                    <button onClick={() => handleDelete(p._id)} className="delete">
+                    <button
+                      onClick={() => handleDelete(p._id)}
+                      className="delete"
+                    >
                       Eliminar
                     </button>
                   </div>
                 </div>
-              )
-            )}
+              );
+            })}
           </div>
         </div>
       ))}
 
       <style>{`
         .admin-panel { max-width: 800px; margin: 0 auto; padding: 20px; font-family: Arial; }
-        h1 { text-align: center; margin-bottom: 20px; }
         .category-section { margin-bottom: 40px; }
         .category-title { font-size: 1.5em; margin-bottom: 10px; color: #0074D9; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
         .product-list { display: flex; flex-direction: column; gap: 15px; }
-        .product-simple-card { border: 1px solid #ccc; padding: 15px; border-radius: 6px; display: flex; align-items: center; gap: 10px; }
-        .product-name { flex-grow: 1; font-weight: bold; }
-        .product-info { display: flex; flex-direction: column; gap: 8px; }
-        .product-edit { display: flex; flex-direction: column; gap: 10px; }
-        .product-edit input, .product-edit textarea, .create-product-form input, .create-product-form textarea {
-          padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px;
-        }
+        .product-simple-card, .product-info { border: 1px solid #ccc; padding: 15px; border-radius: 6px; }
+        .product-name { font-weight: bold; flex-grow: 1; }
         .product-actions { display: flex; gap: 10px; margin-top: 10px; }
-        .product-actions button, .product-edit button {
-          padding: 6px 12px; font-size: 14px; cursor: pointer; border: none; border-radius: 4px;
-        }
-        .product-actions button { background-color: #28a745; color: white; }
+        .product-actions button { background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
         .product-actions .delete { background-color: #dc3545; }
-        .product-edit .cancel { background-color: #dc3545; color: white; }
         .create-product-form { background-color: #f4f4f4; padding: 20px; margin-bottom: 30px; border-radius: 8px; }
-        .create-product-form h2 { margin-bottom: 15px; color: #333; }
-        .create-product-form form { display: flex; flex-direction: column; gap: 10px; }
-        .create-product-form button {
-          width: fit-content; background-color: #007bff; color: white; border: none; padding: 8px 14px; border-radius: 4px; cursor: pointer;
-        }
+        .create-product-form input, .create-product-form textarea { padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; width: 100%; }
+        .create-product-form button { background-color: #007bff; color: white; border: none; padding: 8px 14px; border-radius: 4px; cursor: pointer; margin-top: 10px; }
         .create-product-form label { display: flex; align-items: center; gap: 8px; }
       `}</style>
     </div>
