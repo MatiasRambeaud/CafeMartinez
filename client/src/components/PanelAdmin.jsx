@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const API_BASE = "api/products";
+const API_BASE = `${process.env.REACT_APP_PROXY}/api/products`;
 
 const AdminPanel = () => {
   const [products, setProducts] = useState([]);

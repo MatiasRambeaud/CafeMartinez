@@ -2,13 +2,16 @@ import { useEffect, useState } from "react";
 import Producto from "./Producto";
 
 export default function MostrarProductos() {
+
+  const API_BASE = `${process.env.REACT_APP_PROXY}/api/products`;
+
   const [productos, setProductos] = useState([]);
 
   useEffect(() => {
-    fetch("/api/products")
+    fetch(API_BASE)
       .then((res) => res.json())
       .then((json) => setProductos(json.payload));
-  }, []);
+  });
 
   const productosPorCategoria = productos.reduce((acc, producto) => {
     if (!acc[producto.category]) acc[producto.category] = [];
