@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Producto from "./Producto";
 
 export default function MostrarProductos() {
@@ -7,10 +7,11 @@ export default function MostrarProductos() {
 
   const [productos, setProductos] = useState([]);
 
-  fetch(API_BASE)
-    .then((res) => res.json())
-    .then((json) => setProductos(json.payload));
-  
+  useEffect(() => {
+    fetch(API_BASE)
+      .then((res) => res.json())
+      .then((json) => setProductos(json.payload));
+  });
 
   const productosPorCategoria = productos.reduce((acc, producto) => {
     if (!acc[producto.category]) acc[producto.category] = [];
