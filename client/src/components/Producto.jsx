@@ -119,18 +119,20 @@ export default function Producto({ producto }) {
 
         .producto-variaciones-horizontal {
           display: flex;
-          gap: 20px;
-          margin-top: 8px;
+          flex-direction: row;
+          flex-wrap: wrap;
+          gap: 16px;
+          margin-top: 10px;
           padding-left: 0;
           list-style: none;
+          justify-content: center;
+          align-items: center;
+          overflow: hidden;
           color: #e3c46b;
           font-size: 1rem;
           font-weight: 600;
-          overflow-x: auto;
-          white-space: nowrap;
-          justify-content: center; /* Centra horizontalmente */
-          align-items: center; /* Centra verticalmente */
         }
+
 
         .producto-variaciones-horizontal::-webkit-scrollbar {
           height: 6px;

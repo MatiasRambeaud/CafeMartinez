@@ -87,12 +87,13 @@ export default function MostrarProductos() {
 
         .categoria-nav {
           display: flex;
-          overflow-x: auto;
+          flex-wrap: wrap;           
           gap: 12px;
           padding: 16px 0;
           margin-bottom: 24px;
-          justify-content: center;
+          justify-content: center;   
         }
+
 
         .categoria-btn {
           flex: 0 0 auto;
@@ -129,6 +130,12 @@ export default function MostrarProductos() {
           display: flex;
           flex-direction: column;
           gap: 16px;
+        }
+        :root, html, body {
+          margin: 0;
+          padding: 0;
+          background-color: #1f1a17;
+          min-height: 100vh;
         }
       `}</style>
     </>
