@@ -22,7 +22,7 @@ export default function MostrarProductos() {
   const scrollToCategoria = (id) => {
     const section = document.getElementById(id);
     if (section) {
-      section.scrollIntoView({ behavior: "smooth", block: "start" });
+      section.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   };
 

@@ -17,13 +17,13 @@ export default function Producto({ producto }) {
       >
         <h3
           className="producto-titulo"
-          style={tieneVariaciones ? { fontSize: "1.4rem", fontWeight: "700" } : {}}
+          style={tieneVariaciones ? { fontSize: "1.4rem", fontWeight: "700", textAlign: "center", marginBottom: "10px" } : {}}
         >
           {producto.title}
         </h3>
         <p
           className="producto-descripcion"
-          style={tieneVariaciones ? { fontSize: "1.05rem" } : {}}
+          style={tieneVariaciones ? { fontSize: "1.05rem", textAlign: "center" } : {}}
         >
           {producto.description}
         </p>
