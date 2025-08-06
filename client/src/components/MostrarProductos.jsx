@@ -56,6 +56,21 @@ export default function MostrarProductos() {
             </div>
           </section>
         ))}
+
+        <a
+          href={`https://wa.me/${process.env.REACT_APP_PHONE}`}
+          className="whatsapp-float"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img
+            src="/images/whatsapp_logo.png"
+            alt="WhatsApp"
+            className="whatsapp-icon"
+          />
+        </a>
+
+
       </div>
 
       <style>{`
@@ -131,12 +146,42 @@ export default function MostrarProductos() {
           flex-direction: column;
           gap: 16px;
         }
+
         :root, html, body {
           margin: 0;
           padding: 0;
           background-color: #1f1a17;
           min-height: 100vh;
         }
+
+        .whatsapp-float {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          z-index: 999;
+          width: 45px;
+          height: 45px;
+          background-color: rgba(37, 211, 102, 0.9);
+          border-radius: 50%;
+          border: solid rgba(37, 211, 102, 0.9) 2px;
+          background: radial-gradient(circle at center, #25D366 40%, rgba(37,211,102,0.25) 100%);
+          box-shadow: 0 4px 16px rgba(37, 211, 102, 0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.2s;
+        }
+
+        .whatsapp-float:hover {
+          transform: scale(1.1);
+          background-color: rgba(37, 211, 102, 1);
+        }
+
+        .whatsapp-icon {
+          width: 45px;
+          height: 45px;
+        }
+
       `}</style>
     </>
   );
