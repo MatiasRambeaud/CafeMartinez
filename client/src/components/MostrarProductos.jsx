@@ -2,16 +2,30 @@ import { useEffect, useState } from "react";
 import Producto from "./Producto";
 
 export default function MostrarProductos() {
-
   const API_BASE = `${process.env.REACT_APP_PROXY}/api/products`;
 
   const [productos, setProductos] = useState([]);
+  const [mostrarFlecha, setMostrarFlecha] = useState(false);
 
   useEffect(() => {
     fetch(API_BASE)
       .then((res) => res.json())
       .then((json) => setProductos(json.payload));
-  });
+  }, []);
+
+  useEffect(() => {
+  const manejarScroll = () => {
+    setMostrarFlecha(window.scrollY > 300);
+  };
+
+  window.addEventListener("scroll", manejarScroll);
+  return () => window.removeEventListener("scroll", manejarScroll);
+}, []);
+
+
+  const irArriba = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const productosPorCategoria = productos.reduce((acc, producto) => {
     if (!acc[producto.category]) acc[producto.category] = [];
@@ -70,6 +84,12 @@ export default function MostrarProductos() {
           />
         </a>
 
+        <button
+          className={`scroll-to-top ${mostrarFlecha ? "visible" : "oculto"}`}
+          onClick={irArriba}
+        >
+          ↑
+        </button>
 
       </div>
 
@@ -108,7 +128,6 @@ export default function MostrarProductos() {
           margin-bottom: 24px;
           justify-content: center;   
         }
-
 
         .categoria-btn {
           flex: 0 0 auto;
@@ -181,6 +200,39 @@ export default function MostrarProductos() {
           width: 45px;
           height: 45px;
         }
+        
+        .scroll-to-top {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          z-index: 998;
+          background-color: #d4af37;
+          color: #1f1a17;
+          border: none;
+          border-radius: 50%;
+          font-size: 1.5rem;
+          width: 45px;
+          height: 45px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+          cursor: pointer;
+          transition: opacity 0.4s ease, transform 0.4s ease;
+          opacity: 0;
+          transform: scale(0.8);
+          pointer-events: none;
+        }
+
+        .scroll-to-top.visible {
+          opacity: 1;
+          transform: scale(1);
+          pointer-events: auto;
+        }
+              
+        .scroll-to-top.oculto {
+          opacity: 0;
+          transform: scale(0.8);
+          pointer-events: none;
+        }
+
 
       `}</style>
     </>
