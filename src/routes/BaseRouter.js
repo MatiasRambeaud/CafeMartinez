@@ -1,5 +1,8 @@
 import { Router } from "express";
 
+import { passportCall } from "../middlewares/passportCall.js";
+import { executePolicies } from "../middlewares/policies.js";
+
 export default class BaseRouter {
 
     constructor(){
@@ -14,24 +17,28 @@ export default class BaseRouter {
         return this.router;
     }
 
-    get(path,...callbacks){
-        this.router.get(path,this.sendResponses,this.applyCallbacks(callbacks));
+    get(path,policies,...callbacks){
+        if(!policies||!Array.isArray(policies)) throw new Error('Policies required for endpoint '+path);
+        this.router.get(path,this.sendResponses,passportCall('current'),executePolicies(policies), this.applyCallbacks(callbacks));
     }
-    post(path,...callbacks){
-        this.router.post(path,this.sendResponses,this.applyCallbacks(callbacks));
+    post(path,policies,...callbacks){
+        if(!policies||!Array.isArray(policies)) throw new Error('Policies required for endpoint '+path);
+        this.router.post(path,this.sendResponses,passportCall('current'),executePolicies(policies),this.applyCallbacks(callbacks));
     }
-    put(path,...callbacks){
-        this.router.put(path,this.sendResponses,this.applyCallbacks(callbacks));
+    put(path,policies,...callbacks){
+        if(!policies||!Array.isArray(policies)) throw new Error('Policies required for endpoint '+path);
+        this.router.put(path,this.sendResponses,passportCall('current'),executePolicies(policies),this.applyCallbacks(callbacks));
     }
-    delete(path,...callbacks){
-        this.router.delete(path,this.sendResponses,this.applyCallbacks(callbacks));
+    delete(path,policies,...callbacks){
+        if(!policies||!Array.isArray(policies)) throw new Error('Policies required for endpoint '+path);
+        this.router.delete(path,this.sendResponses,passportCall('current'),executePolicies(policies),this.applyCallbacks(callbacks));
     }
 
     sendResponses(req,res,next){
         res.sendSuccess = (message) => res.status(200).send({status:"success",message});
-        res.sendBadRequest = (message) => res.status(400).send({status:"success",error:message||"Solicitud incorrecta"});
-        res.sendUnauthorized = (message) => res.status(401).send({status:"error",error:message||"No autorizado"});
-        res.sendServerError = (message) => res.status(500).send({status:"error", error:message||"Error interno del servidor"})
+        res.sendBadRequest = (message) => res.status(400).send({status:"success",error:message||"Bad request"});
+        res.sendUnauthorized = (message) => res.status(401).send({status:"error",error:message||"Unauthorized"});
+        res.sendServerError = (message) => res.status(500).send({status:"error", error:message||"Server error"})
         res.sendPayload = (message, payload) => res.status(200).send({status:"success",message, payload});
         next();
     }
