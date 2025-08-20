@@ -16,12 +16,12 @@ const loginUser = async(req, res) => {
         } catch (error) {
             return res.sendBadRequest("Server error");
         }
-        return res.sendSuccess("successfully logged-in")
+        return res.sendPayload(null,req.user)
     }
 }
 const current = async(req, res) => {
     if (req.user) {
-        res.sendSuccess(req.user);
+        res.sendPayload(req.user);
     } else {
         res.sendUnauthorized("need to log in first");
     }

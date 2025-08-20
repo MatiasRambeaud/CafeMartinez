@@ -151,18 +151,18 @@ const AdminPanel = () => {
           <input name="category" placeholder="Categoría" required />
           <input name="code" placeholder="Código" required />
           <input name="image" placeholder="Imagen (ej. pizza.jpg)" />
-          <label>
-            Activo:
-            <input name="status" type="checkbox" defaultChecked />
+          <label className="switch-label">
+            Activo
+            <label className="switch">
+              <input name="status" type="checkbox" defaultChecked />
+              <span className="slider"></span>
+            </label>
           </label>
 
           <div>
             <h3>Variaciones</h3>
             {variations.map((v, i) => (
-              <div
-                key={i}
-                style={{ display: "flex", gap: "10px", marginBottom: "8px" }}
-              >
+              <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "8px" }}>
                 <input
                   type="text"
                   placeholder="Nombre variación"
@@ -192,8 +192,12 @@ const AdminPanel = () => {
                 </button>
               </div>
             ))}
-            <button type="button" onClick={() => setVariaciones([...variations, { nombre: "", precio: 0 }])}>
-              Agregar variación
+            <button
+              type="button"
+              className="btn-variation"
+              onClick={() => setVariaciones([...variations, { nombre: "", precio: 0 }])}
+            >
+              ➕ Agregar variación
             </button>
           </div>
 
@@ -350,31 +354,24 @@ const AdminPanel = () => {
                         }}
                       />
                     </p>
-                    <p>
-                      <label style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                    <label className="switch-label">
+                      Activo
+                      <label className="switch">
                         <input
                           type="checkbox"
                           checked={editedProduct.status}
                           onChange={(e) => handleChange("status")(e)}
                         />
-                        Activo
+                        <span className="slider"></span>
                       </label>
-                    </p>
-
+                    </label>
                     <div>
                       <strong>Variaciones:</strong>
-                      {(editedProduct.variations?.length || 0) === 0 && (
-                        <p>No tiene variaciones</p>
-                      )}
+                      {(editedProduct.variations?.length || 0) === 0 && <p>No tiene variaciones</p>}
                       {(editedProduct.variations || []).map((v, i) => (
                         <div
                           key={i}
-                          style={{
-                            display: "flex",
-                            gap: "8px",
-                            marginTop: "6px",
-                            alignItems: "center",
-                          }}
+                          style={{ display: "flex", gap: "8px", marginTop: "6px", alignItems: "center" }}
                         >
                           <input
                             type="text"
@@ -383,10 +380,7 @@ const AdminPanel = () => {
                             onChange={(e) => {
                               const nuevasVar = [...editedProduct.variations];
                               nuevasVar[i] = { ...nuevasVar[i], nombre: e.target.value };
-                              setEditedProduct((prev) => ({
-                                ...prev,
-                                variations: nuevasVar,
-                              }));
+                              setEditedProduct((prev) => ({ ...prev, variations: nuevasVar }));
                             }}
                             style={{ flex: "1" }}
                           />
@@ -396,14 +390,8 @@ const AdminPanel = () => {
                             value={v.precio}
                             onChange={(e) => {
                               const nuevasVar = [...editedProduct.variations];
-                              nuevasVar[i] = {
-                                ...nuevasVar[i],
-                                precio: Number(e.target.value),
-                              };
-                              setEditedProduct((prev) => ({
-                                ...prev,
-                                variations: nuevasVar,
-                              }));
+                              nuevasVar[i] = { ...nuevasVar[i], precio: Number(e.target.value) };
+                              setEditedProduct((prev) => ({ ...prev, variations: nuevasVar }));
                             }}
                             style={{ width: "80px" }}
                           />
@@ -412,10 +400,7 @@ const AdminPanel = () => {
                             onClick={() => {
                               const nuevasVar = [...editedProduct.variations];
                               nuevasVar.splice(i, 1);
-                              setEditedProduct((prev) => ({
-                                ...prev,
-                                variations: nuevasVar,
-                              }));
+                              setEditedProduct((prev) => ({ ...prev, variations: nuevasVar }));
                             }}
                           >
                             ❌
@@ -424,29 +409,20 @@ const AdminPanel = () => {
                       ))}
                       <button
                         type="button"
+                        className="btn-variation"
                         onClick={() => {
-                          const nuevasVar = [
-                            ...(editedProduct.variations || []),
-                            { nombre: "", precio: 0 },
-                          ];
-                          setEditedProduct((prev) => ({
-                            ...prev,
-                            variations: nuevasVar,
-                          }));
+                          const nuevasVar = [...(editedProduct.variations || []), { nombre: "", precio: 0 }];
+                          setEditedProduct((prev) => ({ ...prev, variations: nuevasVar }));
                         }}
                         style={{ marginTop: "8px" }}
                       >
-                        Agregar variación
+                        ➕ Agregar variación
                       </button>
                     </div>
 
                     <div className="product-actions" style={{ marginTop: "12px" }}>
                       <button onClick={handleSave}>Guardar</button>
-                      <button
-                        onClick={handleCancelEdit}
-                        className="delete"
-                        style={{ marginLeft: "10px" }}
-                      >
+                      <button onClick={handleCancelEdit} className="delete" style={{ marginLeft: "10px" }}>
                         Cancelar
                       </button>
                     </div>
@@ -466,19 +442,14 @@ const AdminPanel = () => {
                       <strong>Variaciones:</strong>
                       <ul>
                         {p.variations.map((v, i) => (
-                          <li key={i}>
-                            {v.nombre} - ${v.precio}
-                          </li>
+                          <li key={i}>{v.nombre} - ${v.precio}</li>
                         ))}
                       </ul>
                     </div>
                   )}
                   <div className="product-actions">
                     <button onClick={() => handleEditClick(p)}>Editar</button>
-                    <button
-                      onClick={() => handleDelete(p._id)}
-                      className="delete"
-                    >
+                    <button onClick={() => handleDelete(p._id)} className="delete">
                       Eliminar
                     </button>
                   </div>
@@ -488,7 +459,6 @@ const AdminPanel = () => {
           </div>
         </div>
       ))}
-
     </div>
   );
 };

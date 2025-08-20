@@ -20,7 +20,7 @@ mongoose.connect(process.env.MONGO_URL)
     .then(() => console.log("MongoDB connected"))
     .catch(err => console.error("MongoDB connection error:", err));
 
-app.use(cors({ origin: 'http://localhost:3001' }));
+app.use(cors({ origin: 'http://localhost:3001' , credentials: true  }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
