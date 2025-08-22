@@ -1,26 +1,38 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    setError(null); // limpiar errores anteriores
 
-  try {
-    await fetch(`${process.env.REACT_APP_PROXY}/api/sessions/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include", // 👈 clave para cookies
-      body: JSON.stringify({ email, password }),
-    });  
-  } catch (err) {
-    console.error(err);
-    setError("Error al conectar con el servidor");
-  }
-};
+    try {
+      const res = await fetch(`${process.env.REACT_APP_PROXY}/api/sessions/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ name, password }),
+      });
 
+      const data = await res.json();
+
+      if (data.status === "success") {
+        // Login exitoso
+        navigate("/panel"); // redirige a /panel
+      } else {
+        // Mostrar mensaje de error
+        setError(data.error || "Datos de login incorrectos");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Error al conectar con el servidor");
+    }
+  };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -34,12 +46,12 @@ const Login = () => {
 
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-600 mb-1">
-            Email
+            Nombre
           </label>
           <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             required
             className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />

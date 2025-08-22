@@ -6,8 +6,8 @@ export default class UserRepository {
     getUser(id) {
         return this.dao.getOne({ _id: id });
     }
-    getUserByEmail(email) {
-        return this.dao.getOne({ email: email })
+    getUserByName(name) {
+        return this.dao.getOne({ name: name })
     }
     createUser(user) {
         return this.dao.create(user);

@@ -1,4 +1,3 @@
-// src/components/ProtectedRoute.jsx
 import { Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
@@ -14,12 +13,18 @@ const ProtectedRoute = ({ children, roleRequired }) => {
         });
         const data = await res.json();
 
-        if (data.status === "success" && data.message.role === roleRequired) {
+        // Mostrar en consola toda la respuesta para debugging
+        console.log("RESPUESTA BACKEND /current:", data);
+
+        if (data.status === "success" && data.message?.role === roleRequired) {
+          console.log("✅ Usuario autorizado:", data.message);
           setAuthorized(true);
         } else {
+          console.log("❌ Usuario NO autorizado. Payload:", data.message);
           setAuthorized(false);
         }
       } catch (err) {
+        console.error("Error al verificar sesión:", err);
         setAuthorized(false);
       } finally {
         setLoading(false);

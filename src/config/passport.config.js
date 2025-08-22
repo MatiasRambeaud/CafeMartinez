@@ -9,46 +9,75 @@ import config from "../config/dotenv.config.js";
 const authService = new AuthService();
 
 const initializePassportConfig = () => {
-    passport.use('register', new LocalStrategy({ usernameField: 'email', passReqToCallback: true }, async(req, email, password, done) => {
-        const { role } = req.body;
-        const user = await UsersService.getUserByEmail(email);
-        if (user) {
-            return done(null, false, res.sendBadRequest("User already exists"));
-        };
-        const hashedPassword = await authService.hashPassword(password);
-        const User = {
-            email,
+  passport.use(
+    "register",
+    new LocalStrategy(
+      { usernameField: "name", passReqToCallback: true },
+      async (req, name, password, done) => {
+        try {
+          const { role } = req.body;
+          const user = await UsersService.getUserByName(name);
+          if (user) {
+            return done(null, false, { message: "User already exists" });
+          }
+          const hashedPassword = await authService.hashPassword(password);
+          const newUser = {
+            name,
             password: hashedPassword,
-            role: role || "user"
+            role: role || "user",
+          };
+          const result = await UsersService.createUser(newUser);
+          return done(null, result);
+        } catch (error) {
+          return done(error);
         }
-        const result = await UsersService.createUser(User);
-        return done(null, result);
-    }));
+      }
+    )
+  );
 
-    passport.use('login', new LocalStrategy({ usernameField: 'email' }, async(email, password, done) => {
-        const user = await UsersService.getUserByEmail(email);
-        if (!user) {
-            return done(null, false, res.sendBadRequest("Incorrect values"));
-        };
-        const validation = await authService.validatePassword(password, user.password);
-        if (!validation) {
-            return done(null, false, res.sendBadRequest("Incorrect values"));
+  passport.use(
+    "login",
+    new LocalStrategy(
+      { usernameField: "name" },
+      async (name, password, done) => {
+        try {
+          const user = await UsersService.getUserByName(name);
+          if (!user) {
+            return done(null, false, { message: "Incorrect values" });
+          }
+          const valid = await authService.validatePassword(password, user.password);
+          if (!valid) {
+            return done(null, false, { message: "Incorrect values" });
+          }
+          return done(null, user);
+        } catch (error) {
+          return done(error);
         }
-        return done(null, user);
-    }));
+      }
+    )
+  );
 
-    passport.use('current', new JWTStrategy({
+  passport.use(
+    "current",
+    new JWTStrategy(
+      {
         secretOrKey: process.env.JWT_SECRET,
-        jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor])
-    }, async(payload, done) => {
-        if (payload) return done(null, payload);
-        else return done(null, false);
-    }));
-
-}
+        jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
+      },
+      async (payload, done) => {
+        try {
+          if (payload) return done(null, payload);
+          return done(null, false);
+        } catch (error) {
+          return done(error, false);
+        }
+      }
+    )
+  );
+};
 
 function cookieExtractor(req) {
-    return req?.cookies?.[process.env.JWT_COOKIE] || null;
+  return req?.cookies?.[process.env.JWT_COOKIE] || null;
 }
 
 export default initializePassportConfig;
