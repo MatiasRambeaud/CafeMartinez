@@ -48,10 +48,7 @@ export default function MostrarProductos() {
   return (
     <>
       <div className="menu-container">
-        <header className="header">
-          <img src="/images/logo.png" alt="Café Martínez" className="logo" />
-          <h1 className="titulo">Café Martínez</h1>
-        </header>
+
 
         <nav className="categoria-nav">
           {Object.keys(productosPorCategoria).map((categoria) => (
