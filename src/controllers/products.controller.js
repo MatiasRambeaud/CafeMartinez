@@ -27,28 +27,36 @@ const getProductById = async (req, res) => {
 };
 
 const createProduct = async (req, res) => {
-  const data = req.body;
-  const newProduct = {
-    title: data.title,
-    description: data.description,
-    code: data.code,
-    price: data.price,
-    image: data.image || null,
-    category: data.category,
-    status: data.status !== undefined ? data.status : true,
-    variations: data.variations || [], // <-- nueva funcionalidad
-  };
+  try {
+    const data = req.body;
 
-  const exists = await ProductsService.searchProduct({ code: newProduct.code });
-  if (exists.length > 0) {
-    return res.sendBadRequest("El producto ya existe");
-  }
+    const newProduct = {
+      title: data.title,
+      description: data.description,
+      code: data.code,
+      price: data.price,
+      category: data.category,
+      status: data.status !== undefined ? data.status : true,
+      variations: data.variations || [],
+      // 👇 Si no se subió archivo, queda en null (o podés poner una imagen por defecto)
+      image: req.file ? req.file.filename : null,
+    };
 
-  const product = await ProductsService.createProduct(newProduct);
-  if (!product) {
-    return res.sendServerError("No se pudo crear el producto");
+    const exists = await ProductsService.searchProduct({ code: newProduct.code });
+    if (exists.length > 0) {
+      return res.sendBadRequest("El producto ya existe");
+    }
+
+    const product = await ProductsService.createProduct(newProduct);
+    if (!product) {
+      return res.sendServerError("No se pudo crear el producto");
+    }
+
+    return res.sendPayload("Producto creado con éxito", product);
+  } catch (err) {
+    console.error(err);
+    return res.sendServerError("Error en creando el producto");
   }
-  return res.sendPayload("Producto creado con éxito", product);
 };
 
 const updateProduct = async (req, res) => {

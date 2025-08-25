@@ -4,6 +4,10 @@ import "./css/panelAdmin.css";
 const API_BASE = `${process.env.REACT_APP_PROXY}/api/products`;
 
 const AdminPanel = () => {
+  useEffect(() => {
+    document.title = "Café Martines - Administración";
+  }, []);
+
   const [products, setProducts] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [editedProduct, setEditedProduct] = useState(null);
@@ -43,6 +47,9 @@ const AdminPanel = () => {
     setEditedProduct(null);
   };
 
+  // 🔧 IMPORTANTE:
+  // Dejamos el PUT como JSON (igual que antes) para no romper tu backend/rutas.
+  // No tocamos la imagen en edición (seguís pudiendo escribir el nombre si querés).
   const handleSave = async () => {
     try {
       await fetch(`${API_BASE}/${editingId}`, {
@@ -116,21 +123,26 @@ const AdminPanel = () => {
           onSubmit={async (e) => {
             e.preventDefault();
             try {
-              const nuevoProducto = {
-                title: e.target.title.value,
-                description: e.target.description.value,
-                price: parseFloat(e.target.price.value),
-                category: e.target.category.value,
-                code: e.target.code.value,
-                image: e.target.image.value,
-                status: e.target.status.checked,
-                variations: variations,
-              };
+              // ✅ Nuevo: Envío por FormData SOLO en creación (imagen opcional)
+              const formData = new FormData();
+              formData.append("title", e.target.title.value);
+              formData.append("description", e.target.description.value);
+              formData.append("price", parseFloat(e.target.price.value));
+              formData.append("category", e.target.category.value);
+              formData.append("code", e.target.code.value);
+              formData.append("status", e.target.status.checked);
+              // En multipart, los arrays viajan como strings: mandamos JSON
+              formData.append("variations", JSON.stringify(variations));
+              // 👇 imagen opcional
+              if (e.target.image.files.length > 0) {
+                formData.append("image", e.target.image.files[0]);
+              }
+
               await fetch(API_BASE, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(nuevoProducto),
+                body: formData, // No setear headers; el browser arma el boundary
               });
+
               e.target.reset();
               setVariaciones([]);
               fetchProducts();
@@ -150,7 +162,12 @@ const AdminPanel = () => {
           />
           <input name="category" placeholder="Categoría" required />
           <input name="code" placeholder="Código" required />
-          <input name="image" placeholder="Imagen (ej. pizza.jpg)" />
+
+          <div className="file-input">
+            <input type="file" name="image" accept="image/*" />
+            <span className="file-hint">Imagen (opcional)</span>
+          </div>
+
           <label className="switch-label">
             Activo
             <label className="switch">
@@ -183,11 +200,14 @@ const AdminPanel = () => {
                     setVariaciones(nuevas);
                   }}
                 />
-                <button type="button" onClick={() => {
-                  const nuevas = [...variations];
-                  nuevas.splice(i, 1);
-                  setVariaciones(nuevas);
-                }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nuevas = [...variations];
+                    nuevas.splice(i, 1);
+                    setVariaciones(nuevas);
+                  }}
+                >
                   ❌
                 </button>
               </div>
@@ -197,7 +217,7 @@ const AdminPanel = () => {
               className="btn-variation"
               onClick={() => setVariaciones([...variations, { nombre: "", precio: 0 }])}
             >
-              ➕ Agregar variación
+              Agregar variación
             </button>
           </div>
 
@@ -210,28 +230,12 @@ const AdminPanel = () => {
         placeholder="Buscar..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        style={{
-          width: "100%",
-          padding: "8px",
-          marginBottom: "12px",
-          fontSize: "16px",
-          borderRadius: "4px",
-          border: "1px solid #ccc",
-        }}
+        className="search-input"
       />
 
       <button
         onClick={() => setSimpleView(!simpleView)}
-        style={{
-          marginBottom: "20px",
-          padding: "8px 16px",
-          cursor: "pointer",
-          borderRadius: "4px",
-          border: "none",
-          backgroundColor: simpleView ? "#0074D9" : "#28a745",
-          color: "white",
-          fontWeight: "bold",
-        }}
+        className={`toggle-view ${simpleView ? "is-simple" : ""}`}
       >
         {simpleView ? "Volver a vista completa" : "Mostrar solo nombre y precio"}
       </button>
@@ -251,9 +255,11 @@ const AdminPanel = () => {
                       type="number"
                       value={priceEdits[p._id] ?? p.price}
                       onChange={(e) => handlePriceChange(p._id, e.target.value)}
-                      style={{ width: "100px", marginRight: "10px", padding: "4px" }}
+                      className="price-inline-input"
                     />
-                    <button onClick={() => handleSavePrice(p._id)}>Guardar</button>
+                    <button onClick={() => handleSavePrice(p._id)} className="btn-inline">
+                      Guardar
+                    </button>
                   </div>
                 );
               }
@@ -266,30 +272,14 @@ const AdminPanel = () => {
                         type="text"
                         value={editedProduct.title}
                         onChange={(e) => handleChange("title")(e)}
-                        style={{
-                          fontSize: "1.3em",
-                          fontWeight: "bold",
-                          width: "100%",
-                          boxSizing: "border-box",
-                          borderRadius: "4px",
-                          border: "1px solid #ccc",
-                          padding: "6px",
-                        }}
+                        className="edit-input"
                       />
                     </h3>
                     <p>
                       <textarea
                         value={editedProduct.description}
                         onChange={(e) => handleChange("description")(e)}
-                        style={{
-                          width: "100%",
-                          minHeight: "60px",
-                          boxSizing: "border-box",
-                          borderRadius: "4px",
-                          border: "1px solid #ccc",
-                          padding: "6px",
-                          resize: "vertical",
-                        }}
+                        className="edit-textarea"
                       />
                     </p>
                     <p>
@@ -299,13 +289,7 @@ const AdminPanel = () => {
                         value={editedProduct.price}
                         onChange={(e) => handleChange("price")(e)}
                         step="0.01"
-                        style={{
-                          width: "100px",
-                          boxSizing: "border-box",
-                          borderRadius: "4px",
-                          border: "1px solid #ccc",
-                          padding: "4px",
-                        }}
+                        className="edit-input narrow"
                       />
                     </p>
                     <p>
@@ -314,13 +298,7 @@ const AdminPanel = () => {
                         type="text"
                         value={editedProduct.category}
                         onChange={(e) => handleChange("category")(e)}
-                        style={{
-                          width: "200px",
-                          boxSizing: "border-box",
-                          borderRadius: "4px",
-                          border: "1px solid #ccc",
-                          padding: "4px",
-                        }}
+                        className="edit-input medium"
                       />
                     </p>
                     <p>
@@ -329,29 +307,17 @@ const AdminPanel = () => {
                         type="text"
                         value={editedProduct.code}
                         onChange={(e) => handleChange("code")(e)}
-                        style={{
-                          width: "150px",
-                          boxSizing: "border-box",
-                          borderRadius: "4px",
-                          border: "1px solid #ccc",
-                          padding: "4px",
-                        }}
+                        className="edit-input narrow"
                       />
                     </p>
                     <p>
-                      <strong>Imagen: </strong>
+                      <strong>Imagen (nombre): </strong>
                       <input
                         type="text"
-                        value={editedProduct.image}
+                        value={editedProduct.image || ""}
                         onChange={(e) => handleChange("image")(e)}
                         placeholder="ej. pizza.jpg"
-                        style={{
-                          width: "200px",
-                          boxSizing: "border-box",
-                          borderRadius: "4px",
-                          border: "1px solid #ccc",
-                          padding: "4px",
-                        }}
+                        className="edit-input medium"
                       />
                     </p>
                     <label className="switch-label">
@@ -365,6 +331,7 @@ const AdminPanel = () => {
                         <span className="slider"></span>
                       </label>
                     </label>
+
                     <div>
                       <strong>Variaciones:</strong>
                       {(editedProduct.variations?.length || 0) === 0 && <p>No tiene variaciones</p>}
@@ -382,6 +349,7 @@ const AdminPanel = () => {
                               nuevasVar[i] = { ...nuevasVar[i], nombre: e.target.value };
                               setEditedProduct((prev) => ({ ...prev, variations: nuevasVar }));
                             }}
+                            className="edit-input"
                             style={{ flex: "1" }}
                           />
                           <input
@@ -393,10 +361,11 @@ const AdminPanel = () => {
                               nuevasVar[i] = { ...nuevasVar[i], precio: Number(e.target.value) };
                               setEditedProduct((prev) => ({ ...prev, variations: nuevasVar }));
                             }}
-                            style={{ width: "80px" }}
+                            className="edit-input narrow"
                           />
                           <button
                             type="button"
+                            className="btn-inline danger"
                             onClick={() => {
                               const nuevasVar = [...editedProduct.variations];
                               nuevasVar.splice(i, 1);
@@ -442,7 +411,9 @@ const AdminPanel = () => {
                       <strong>Variaciones:</strong>
                       <ul>
                         {p.variations.map((v, i) => (
-                          <li key={i}>{v.nombre} - ${v.precio}</li>
+                          <li key={i}>
+                            {v.nombre} - ${v.precio}
+                          </li>
                         ))}
                       </ul>
                     </div>

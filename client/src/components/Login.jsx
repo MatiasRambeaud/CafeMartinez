@@ -1,7 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import "./css/login.css";
 
 const Login = () => {
+
+  useEffect(() => {
+      document.title = "Café Martines - Login";
+  }, []);
+
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
@@ -9,7 +15,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null); // limpiar errores anteriores
+    setError(null);
 
     try {
       const res = await fetch(`${process.env.REACT_APP_PROXY}/api/sessions/login`, {
@@ -22,10 +28,8 @@ const Login = () => {
       const data = await res.json();
 
       if (data.status === "success") {
-        // Login exitoso
-        navigate("/panel"); // redirige a /panel
+        navigate("/panel");
       } else {
-        // Mostrar mensaje de error
         setError(data.error || "Datos de login incorrectos");
       }
     } catch (err) {
@@ -35,45 +39,39 @@ const Login = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white shadow-lg rounded-2xl p-8 w-96"
-      >
-        <h2 className="text-2xl font-bold mb-6 text-center">Iniciar sesión</h2>
+    <div className="login-page">
+      <form onSubmit={handleSubmit} className="login-form" noValidate>
+        <h2 className="login-title">Iniciar sesión</h2>
 
-        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+        {error && <p className="login-error">{error}</p>}
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            Nombre
-          </label>
+        <div className="login-field">
+          <label className="login-label" htmlFor="name">Nombre</label>
           <input
+            id="name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="login-input"
+            autoComplete="username"
           />
         </div>
 
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            Contraseña
-          </label>
+        <div className="login-field">
+          <label className="login-label" htmlFor="password">Contraseña</label>
           <input
+            id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="login-input"
+            autoComplete="current-password"
           />
         </div>
 
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
-        >
+        <button type="submit" className="login-btn">
           Entrar
         </button>
       </form>

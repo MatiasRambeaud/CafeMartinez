@@ -5,6 +5,10 @@ import "./css/mostrarProductos.css";
 export default function MostrarProductos() {
   const API_BASE = `${process.env.REACT_APP_PROXY}/api/products`;
 
+  useEffect(() => {
+    document.title = "Café Martines - Menú";
+  }, []);
+
   const [productos, setProductos] = useState([]);
   const [mostrarFlecha, setMostrarFlecha] = useState(false);
 
