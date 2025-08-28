@@ -5,8 +5,8 @@ export default function Producto({ producto }) {
   const tieneVariaciones = producto.variations && producto.variations.length > 0;
 
   return (
-    <div className={`producto-card ${tieneImagen ? "con-imagen" : "sin-imagen"}`}>
-      {tieneImagen && (
+    <div className={`producto-card ${tieneImagen && !tieneVariaciones ? "con-imagen" : "sin-imagen"}`}>
+      {tieneImagen && !tieneVariaciones &&(
         <img
           src={`/images/${producto.image}`}
           alt={producto.title}

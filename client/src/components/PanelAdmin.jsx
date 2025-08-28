@@ -14,11 +14,11 @@ const AdminPanel = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [simpleView, setSimpleView] = useState(false);
   const [priceEdits, setPriceEdits] = useState({});
-  const [variations, setVariaciones] = useState([]);
+  const [variations, setVariations] = useState([]);
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch(API_BASE);
+      const res = await fetch(API_BASE, { credentials: "include" });
       const data = await res.json();
       setProducts(data.payload || []);
     } catch {
@@ -31,9 +31,12 @@ const AdminPanel = () => {
   }, []);
 
   const handleDelete = async (id) => {
-    if (window.confirm("¿Eliminar este producto?")) {
-      await fetch(`${API_BASE}/${id}`, { method: "DELETE" });
+    if (!window.confirm("¿Eliminar este producto?")) return;
+    try {
+      await fetch(`${API_BASE}/${id}`, { method: "DELETE", credentials: "include" });
       fetchProducts();
+    } catch {
+      alert("Error al eliminar producto");
     }
   };
 
@@ -47,24 +50,6 @@ const AdminPanel = () => {
     setEditedProduct(null);
   };
 
-  // 🔧 IMPORTANTE:
-  // Dejamos el PUT como JSON (igual que antes) para no romper tu backend/rutas.
-  // No tocamos la imagen en edición (seguís pudiendo escribir el nombre si querés).
-  const handleSave = async () => {
-    try {
-      await fetch(`${API_BASE}/${editingId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editedProduct),
-      });
-      setEditingId(null);
-      setEditedProduct(null);
-      fetchProducts();
-    } catch {
-      alert("Error al actualizar producto");
-    }
-  };
-
   const handleChange = (field) => (e) => {
     const value = field === "status" ? e.target.checked : e.target.value;
     if (field === "price") {
@@ -73,6 +58,50 @@ const AdminPanel = () => {
       setEditedProduct((prev) => ({ ...prev, [field]: value }));
     }
   };
+
+  const handleSave = async () => {
+  if (!editedProduct || !editingId) return;
+
+  try {
+    const formData = new FormData();
+    formData.append("title", editedProduct.title);
+    formData.append("description", editedProduct.description);
+    formData.append("price", editedProduct.price);
+    formData.append("category", editedProduct.category);
+    formData.append("code", editedProduct.code);
+    formData.append("status", editedProduct.status);
+
+    if (editedProduct.variations?.length > 0) {
+      formData.append("variations", JSON.stringify(editedProduct.variations));
+    }
+
+    // ✅ Subida de imagen: solo si hay archivo
+    if (editedProduct.newImageFile instanceof File) {
+      formData.append("image", editedProduct.newImageFile);
+    }
+
+    const res = await fetch(`${API_BASE}/${editingId}`, {
+      method: "PUT",
+      body: formData,
+      credentials: "include",
+      // ❌ NO pongas headers aquí, el browser pone multipart/form-data automáticamente
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Error del servidor: ${res.status} - ${errorText}`);
+    }
+
+    setEditingId(null);
+    setEditedProduct(null);
+    fetchProducts();
+  } catch (err) {
+    console.error("Error al actualizar producto:", err);
+    alert("Error al actualizar producto. Revisa la consola del navegador y del backend.");
+  }
+};
+
+
 
   const handlePriceChange = (id, value) => {
     setPriceEdits((prev) => ({ ...prev, [id]: value }));
@@ -86,6 +115,7 @@ const AdminPanel = () => {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ price: Number(newPrice) }),
+        credentials: "include",
       });
       setPriceEdits((prev) => {
         const copy = { ...prev };
@@ -101,9 +131,9 @@ const AdminPanel = () => {
   const filteredProducts = products.filter((p) => {
     const term = searchTerm.toLowerCase();
     return (
-      p.title.toLowerCase().includes(term) ||
-      p.category.toLowerCase().includes(term) ||
-      p.code.toLowerCase().includes(term)
+      p.title?.toLowerCase().includes(term) ||
+      p.category?.toLowerCase().includes(term) ||
+      p.code?.toLowerCase().includes(term)
     );
   });
 
@@ -113,60 +143,72 @@ const AdminPanel = () => {
     return acc;
   }, {});
 
+  // Variaciones nuevas
+  const addVariation = () => setVariations([...variations, { nombre: "", precio: 0 }]);
+  const updateVariation = (i, field, value) => {
+    const newVars = [...variations];
+    newVars[i][field] = field === "precio" ? Number(value) : value;
+    setVariations(newVars);
+  };
+  const removeVariation = (i) => {
+    const newVars = [...variations];
+    newVars.splice(i, 1);
+    setVariations(newVars);
+  };
+
+  const handleCreate = async (e) => {
+  e.preventDefault();
+  try {
+    const formData = new FormData();
+    formData.append("title", e.target.title.value);
+    formData.append("description", e.target.description.value);
+    formData.append("price", e.target.price.value);
+    formData.append("category", e.target.category.value);
+    formData.append("code", e.target.code.value);
+    formData.append("status", e.target.status.checked);
+
+    if (variations.length > 0) {
+      const cleanVariations = variations.filter(
+        (v) => v?.nombre.trim() !== "" && v?.precio !== 0
+      );
+      if (cleanVariations.length > 0) {
+        // OJO: si querés que llegue como JSON en el body, stringify
+        formData.append("variations", JSON.stringify(cleanVariations));
+      }
+    }
+
+    if (e.target.image.files.length > 0) {
+      formData.append("image", e.target.image.files[0]);
+    }
+
+    await fetch(API_BASE, {
+      method: "POST",
+      body: formData, // 👈 acá va el FormData
+      credentials: "include",
+    });
+
+    e.target.reset();
+    setVariations([]);
+    fetchProducts();
+  } catch {
+    alert("Error al crear producto");
+  }
+};
+
+
   return (
     <div className="admin-panel">
       <h1>Panel de Administración</h1>
 
       <div className="create-product-form">
         <h2>Crear nuevo producto</h2>
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault();
-            try {
-              // ✅ Nuevo: Envío por FormData SOLO en creación (imagen opcional)
-              const formData = new FormData();
-              formData.append("title", e.target.title.value);
-              formData.append("description", e.target.description.value);
-              formData.append("price", parseFloat(e.target.price.value));
-              formData.append("category", e.target.category.value);
-              formData.append("code", e.target.code.value);
-              formData.append("status", e.target.status.checked);
-              // En multipart, los arrays viajan como strings: mandamos JSON
-              formData.append("variations", JSON.stringify(variations));
-              // 👇 imagen opcional
-              if (e.target.image.files.length > 0) {
-                formData.append("image", e.target.image.files[0]);
-              }
-
-              await fetch(API_BASE, {
-                method: "POST",
-                body: formData, // No setear headers; el browser arma el boundary
-              });
-
-              e.target.reset();
-              setVariaciones([]);
-              fetchProducts();
-            } catch {
-              alert("Error al crear producto");
-            }
-          }}
-        >
+        <form onSubmit={handleCreate}>
           <input name="title" placeholder="Nombre" required />
           <textarea name="description" placeholder="Descripción" required />
-          <input
-            name="price"
-            type="number"
-            placeholder="Precio"
-            step="0.01"
-            required
-          />
+          <input name="price" type="number" placeholder="Precio" step="0.01" required />
           <input name="category" placeholder="Categoría" required />
           <input name="code" placeholder="Código" required />
-
-          <div className="file-input">
-            <input type="file" name="image" accept="image/*" />
-            <span className="file-hint">Imagen (opcional)</span>
-          </div>
+          <input type="file" name="image" accept="image/*" />
 
           <label className="switch-label">
             Activo
@@ -184,39 +226,20 @@ const AdminPanel = () => {
                   type="text"
                   placeholder="Nombre variación"
                   value={v.nombre}
-                  onChange={(e) => {
-                    const nuevas = [...variations];
-                    nuevas[i].nombre = e.target.value;
-                    setVariaciones(nuevas);
-                  }}
+                  onChange={(e) => updateVariation(i, "nombre", e.target.value)}
                 />
                 <input
                   type="number"
                   placeholder="Precio"
                   value={v.precio}
-                  onChange={(e) => {
-                    const nuevas = [...variations];
-                    nuevas[i].precio = Number(e.target.value);
-                    setVariaciones(nuevas);
-                  }}
+                  onChange={(e) => updateVariation(i, "precio", e.target.value)}
                 />
-                <button
-                  type="button"
-                  onClick={() => {
-                    const nuevas = [...variations];
-                    nuevas.splice(i, 1);
-                    setVariaciones(nuevas);
-                  }}
-                >
+                <button type="button" onClick={() => removeVariation(i)}>
                   ❌
                 </button>
               </div>
             ))}
-            <button
-              type="button"
-              className="btn-variation"
-              onClick={() => setVariaciones([...variations, { nombre: "", precio: 0 }])}
-            >
+            <button type="button" className="btn-variation" onClick={addVariation}>
               Agregar variación
             </button>
           </div>
@@ -267,6 +290,7 @@ const AdminPanel = () => {
               if (isEditing) {
                 return (
                   <div className="product-info" key={p._id}>
+                    {/* Resto del JSX de edición intacto */}
                     <h3>
                       <input
                         type="text"
@@ -311,15 +335,19 @@ const AdminPanel = () => {
                       />
                     </p>
                     <p>
-                      <strong>Imagen (nombre): </strong>
+                      <strong>Imagen:</strong>
                       <input
-                        type="text"
-                        value={editedProduct.image || ""}
-                        onChange={(e) => handleChange("image")(e)}
-                        placeholder="ej. pizza.jpg"
-                        className="edit-input medium"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) =>
+                          setEditedProduct((prev) => ({
+                            ...prev,
+                            newImageFile: e.target.files[0], // 👈 guardamos el archivo
+                          }))
+                        }
                       />
                     </p>
+                    
                     <label className="switch-label">
                       Activo
                       <label className="switch">
@@ -331,7 +359,6 @@ const AdminPanel = () => {
                         <span className="slider"></span>
                       </label>
                     </label>
-
                     <div>
                       <strong>Variaciones:</strong>
                       {(editedProduct.variations?.length || 0) === 0 && <p>No tiene variaciones</p>}
@@ -388,7 +415,6 @@ const AdminPanel = () => {
                         ➕ Agregar variación
                       </button>
                     </div>
-
                     <div className="product-actions" style={{ marginTop: "12px" }}>
                       <button onClick={handleSave}>Guardar</button>
                       <button onClick={handleCancelEdit} className="delete" style={{ marginLeft: "10px" }}>
