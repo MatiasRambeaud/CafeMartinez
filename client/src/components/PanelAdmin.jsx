@@ -79,6 +79,9 @@ const AdminPanel = () => {
     if (editedProduct.newImageFile instanceof File) {
       formData.append("image", editedProduct.newImageFile);
     }
+    if(editedProduct.removeImage){
+      formData.append("removeImage", editedProduct.removeImage);
+    }
 
     const res = await fetch(`${API_BASE}/${editingId}`, {
       method: "PUT",
@@ -97,7 +100,7 @@ const AdminPanel = () => {
     fetchProducts();
   } catch (err) {
     console.error("Error al actualizar producto:", err);
-    alert("Error al actualizar producto. Revisa la consola del navegador y del backend.");
+    alert("Error al actualizar producto. Revisar cambios");
   }
 };
 
@@ -334,20 +337,40 @@ const AdminPanel = () => {
                         className="edit-input narrow"
                       />
                     </p>
-                    <p>
-                      <strong>Imagen:</strong>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) =>
-                          setEditedProduct((prev) => ({
-                            ...prev,
-                            newImageFile: e.target.files[0], // 👈 guardamos el archivo
-                          }))
-                        }
-                      />
-                    </p>
-                    
+                    {!p.image &&(
+                      <p>
+                        <strong>Imagen:</strong>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            setEditedProduct((prev) => ({
+                              ...prev,
+                              newImageFile: e.target.files[0], // 👈 guardamos el archivo
+                            }))
+                          }
+                        />
+                      </p>
+                    )}
+                    {p.image && (
+                      <p>
+                        <strong>Imagen:</strong>
+                        {editedProduct.image}
+                        <button
+                          type="button"
+                          className="btn-inline danger"
+                          onClick={() =>
+                            setEditedProduct((prev) => ({
+                              ...prev,
+                              image: null,
+                              removeImage: true
+                            }))
+                          }
+                        >
+                          ❌
+                        </button>
+                      </p>
+                    )}
                     <label className="switch-label">
                       Activo
                       <label className="switch">

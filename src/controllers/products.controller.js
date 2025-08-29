@@ -73,7 +73,9 @@ const updateProduct = async(req, res) => {
         status: data.status === "true" || data.status === true,
         variations: data.variations ? JSON.parse(data.variations) : null,
     };
-
+    if (data.removeImage) {
+        update.image = null;
+    }
     try {
         const updatedProduct = await ProductsService.updateProduct(pid, update);
         if (!updatedProduct) return res.sendServerError("No se pudo actualizar el producto");
