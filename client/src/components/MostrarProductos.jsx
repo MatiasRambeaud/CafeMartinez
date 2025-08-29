@@ -83,13 +83,18 @@ export default function MostrarProductos() {
             </div>
           </section>
         ))}
-        <button className="whatsapp-float" onClick={openWhatsApp}>
+        <a
+          href={`https://api.whatsapp.com/send?phone=${process.env.REACT_APP_PHONE}`}
+          className="whatsapp-float"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <img
             src="/images/whatsapp_logo.png"
             alt="WhatsApp"
             className="whatsapp-icon"
           />
-        </button>
+        </a>
 
         
 
