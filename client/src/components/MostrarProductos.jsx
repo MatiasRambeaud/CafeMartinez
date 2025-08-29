@@ -44,7 +44,18 @@ export default function MostrarProductos() {
       section.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   };
+  
+  const phone = process.env.REACT_APP_PHONE;
 
+  const openWhatsApp = () => {
+    const isMobile = /Android|iPhone/i.test(navigator.userAgent);
+    if (isMobile) {
+      window.location.href = `whatsapp://send?phone=${phone}`;
+    } else {
+      window.open(`https://wa.me/${phone}`, "_blank");
+    }
+  };
+  
   return (
     <>
       <div className="menu-container">
@@ -72,18 +83,15 @@ export default function MostrarProductos() {
             </div>
           </section>
         ))}
-
-        <a
-          href={`https://wa.me/${process.env.REACT_APP_PHONE}`}
-          className="whatsapp-float"
-          rel="noopener noreferrer"
-        >
+        <button className="whatsapp-float" onClick={openWhatsApp}>
           <img
             src="/images/whatsapp_logo.png"
             alt="WhatsApp"
             className="whatsapp-icon"
           />
-        </a>
+        </button>
+
+        
 
         <button
           className={`scroll-to-top ${mostrarFlecha ? "visible" : "oculto"}`}
