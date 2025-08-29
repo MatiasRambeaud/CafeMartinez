@@ -76,7 +76,6 @@ export default function MostrarProductos() {
         <a
           href={`https://wa.me/${process.env.REACT_APP_PHONE}`}
           className="whatsapp-float"
-          target="_blank"
           rel="noopener noreferrer"
         >
           <img
