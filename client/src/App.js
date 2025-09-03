@@ -4,11 +4,13 @@ import PanelAdmin from "./components/PanelAdmin";
 import MostrarProductos from "./components/MostrarProductos";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./components/Login";
+import ExcelUploader from "./components/excel/ExcelUploader";
 
 const App = () => {
   return (
     <Router>
       <Routes>
+        <Route path="/excel" element={<ExcelUploader />} />
         <Route path="/login" element={<Login />} />
         <Route path="/panel" element={<ProtectedRoute roleRequired="admin"><PanelAdmin /></ProtectedRoute>} />
         <Route path="/menu" element={<MostrarProductos />} />
