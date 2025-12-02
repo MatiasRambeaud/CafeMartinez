@@ -10,7 +10,11 @@ const schema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    // Backward-compatible category display name
     category: String,
+    // Hierarchical categorization
+    categoryId: { type: mongoose.Schema.Types.ObjectId, ref: "Categories", default: null },
+    subcategoryId: { type: mongoose.Schema.Types.ObjectId, ref: "Subcategories", default: null },
     image: String,
     status: {
         type: Boolean,

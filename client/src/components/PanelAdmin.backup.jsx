@@ -46,7 +46,6 @@ const AdminPanel = () => {
     subcategoryName: "",
     assignType: "category"
   });
-  const [buttonText, setButtonText] = useState("Página de decoración");
 
   const fetchProducts = async () => {
     try {
@@ -78,45 +77,19 @@ const AdminPanel = () => {
     }
   };
 
-  const fetchButtonText = async () => {
-    try {
-      const res = await fetch(`${process.env.REACT_APP_PROXY}/api/decor-images/button`);
-      const data = await res.json();
-      if (data.payload && data.payload.text) {
-        setButtonText(data.payload.text);
-      }
-    } catch {
-      // ignore
-    }
-  };
-
   useEffect(() => {
     fetchProducts();
     fetchCategories();
     fetchSubcategories();
-    fetchButtonText();
   }, []);
 
-  const handleUpdateButtonText = async () => {
-    if (!buttonText.trim()) {
-      alert("Por favor ingrese un texto para el botón");
-      return;
-    }
-
+  const handleDelete = async (id) => {
+    if (!window.confirm("¿Eliminar este producto?")) return;
     try {
-      const res = await fetch(`${process.env.REACT_APP_PROXY}/api/decor-images/button`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ text: buttonText.trim() })
-      });
-      if (res.ok) {
-        showNotification("Texto del botón actualizado exitosamente", "success");
-      } else {
-        alert("Error al actualizar texto del botón");
-      }
+      await fetch(`${API_BASE}/${id}`, { method: "DELETE", credentials: "include" });
+      fetchProducts();
     } catch {
-      alert("Error al actualizar texto del botón");
+      alert("Error al eliminar producto");
     }
   };
 
@@ -130,16 +103,6 @@ const AdminPanel = () => {
       categoryId: product.categoryId || "",
       subcategoryId: product.subcategoryId || "",
     });
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("¿Eliminar este producto?")) return;
-    try {
-      await fetch(`${API_BASE}/${id}`, { method: "DELETE", credentials: "include" });
-      fetchProducts();
-    } catch {
-      alert("Error al eliminar producto");
-    }
   };
 
   const handleCancelEdit = () => {
@@ -740,15 +703,13 @@ const AdminPanel = () => {
         </div>
       </div>
     );
-  }
+  };
 
-  return null;
-};
+  return (
+    <div className="admin-panel" onClick={() => setContextMenu({ ...contextMenu, show: false })}>
+      <h1>Panel de Administración</h1>
 
-// Renderizar el componente
-return (
-  <div className="admin-panel" onClick={() => setContextMenu({ ...contextMenu, show: false })}>
-    <h1>Panel de Administración</h1>
+      {/* Notificación */}
       {notification.show && (
         <div className={`notification ${notification.type}`}>
           {notification.message}
@@ -785,31 +746,6 @@ return (
                   <div className="item-description">{category.description || 'Sin descripción'}</div>
                 </div>
               ))}
-            </div>
-          )}
-        </div>
-
-        {/* Lista de subcategorías existentes */}
-        <div className="subcategories-list" style={{ marginBottom: '30px' }}>
-          <h3>Subcategorías existentes</h3>
-          {subcategories.length === 0 ? (
-            <p>No hay subcategorías creadas</p>
-          ) : (
-            <div className="items-grid">
-              {subcategories.map((subcategory) => {
-                const category = categories.find((c) => c._id === subcategory.categoryId);
-                return (
-                  <div 
-                    key={subcategory._id}
-                    className="subcategory-item"
-                    onContextMenu={(e) => handleContextMenu(e, 'subcategory', subcategory)}
-                  >
-                    <div className="item-name">{subcategory.name}</div>
-                    <div className="item-description">{subcategory.description || 'Sin descripción'}</div>
-                    <div className="item-category">Categoría: {category ? category.name : 'Sin categoría'}</div>
-                  </div>
-                );
-              })}
             </div>
           )}
         </div>
@@ -1103,9 +1039,7 @@ return (
               type="button" 
               className="btn-secondary"
               onClick={(e) => {
-                if (e.target.form) {
-                  e.target.form.reset();
-                }
+                e.target.form.reset();
                 setVariations([]);
               }}
             >
@@ -1113,27 +1047,6 @@ return (
             </button>
           </div>
         </form>
-      </div>
-
-      {/* Sección: Texto del botón de decoración */}
-      <div className="decor-images-section">
-        <h2>Texto del botón de decoración</h2>
-        <div className="decor-button-form">
-          <h3>Editar texto del botón</h3>
-          <div className="form-group">
-            <label>Texto del botón de decoración</label>
-            <input
-              type="text"
-              value={buttonText}
-              onChange={(e) => setButtonText(e.target.value)}
-              placeholder="Ej: Página de decoración"
-              required
-            />
-          </div>
-          <button type="button" onClick={handleUpdateButtonText} className="btn-primary">
-            Actualizar Texto
-          </button>
-        </div>
       </div>
 
       <div className="search-container">
@@ -1269,7 +1182,7 @@ return (
                           onChange={(e) =>
                             setEditedProduct((prev) => ({
                               ...prev,
-                              newImageFile: e.target.files[0], // 
+                              newImageFile: e.target.files[0], // 👈 guardamos el archivo
                             }))
                           }
                         />
@@ -1402,6 +1315,36 @@ return (
           </div>
         </div>
       ))}
+    </div>
+  );
+};
+
+  // Renderizar el componente
+  return (
+    <div className="admin-panel" onClick={() => setContextMenu({ ...contextMenu, show: false })}>
+      <h1>Panel de Administración</h1>
+
+      {/* Notificación */}
+      {notification.show && (
+        <div className={`notification ${notification.type}`}>
+          {notification.message}
+          <button onClick={() => setNotification({ ...notification, show: false })}>×</button>
+        </div>
+      )}
+
+      {/* Menú contextual */}
+      {renderContextMenu()}
+
+      {/* Diálogo de confirmación */}
+      {renderConfirmDialog()}
+      
+      {/* Formulario de edición en línea */}
+      {renderInlineEditForm()}
+
+      {/* Resto del JSX del panel de administración */}
+      <div className="admin-content">
+        {/* Aquí va el resto del contenido del panel */}
+      </div>
     </div>
   );
 };

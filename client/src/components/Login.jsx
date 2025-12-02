@@ -5,7 +5,7 @@ import "./css/login.css";
 const Login = () => {
 
   useEffect(() => {
-      document.title = "Café Martines - Login";
+      document.title = "Neldo Martinez - Login";
   }, []);
 
   const [name, setName] = useState("");

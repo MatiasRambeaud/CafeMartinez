@@ -13,10 +13,16 @@ export default class ProductsDao {
     getById(params) {
         return productsModel.findOne(params);
     }
+    find(query) {
+        return productsModel.find(query);
+    }
     update(id,data) {
         return productsModel.updateOne({_id:id}, data);
     }
     delete(id) {
         return productsModel.deleteOne({_id:id});
+    }
+    deleteMany(filter) {
+        return productsModel.deleteMany(filter);
     }
 }

@@ -24,5 +24,10 @@ export default class ProductsRepository {
     deleteProduct(id) {
         return this.dao.delete(id);
     }
-
+    deleteMany(filter) {
+        return this.dao.deleteMany(filter);
+    }
+    find(query) {
+        return this.dao.find(query);
+    }
 }

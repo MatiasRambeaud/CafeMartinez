@@ -11,6 +11,9 @@ import config from "./config/dotenv.config.js";
 import __dirname from './utils.js';
 import ProductsRouter from "./routes/ProductsRouter.js";
 import SessionsRouter from "./routes/SessionsRouter.js";
+import CategoriesRouter from "./routes/CategoriesRouter.js";
+import SubcategoriesRouter from "./routes/SubcategoriesRouter.js";
+import DecorImagesRouter from "./routes/DecorImagesRouter.js";
 import initializePassportConfig from './config/passport.config.js';
 
 
@@ -33,6 +36,9 @@ app.use(passport.initialize());
 
 app.use("/api/products", ProductsRouter);
 app.use("/api/sessions", SessionsRouter);
+app.use("/api/categories", CategoriesRouter);
+app.use("/api/subcategories", SubcategoriesRouter);
+app.use("/api/decor-images", DecorImagesRouter);
 
 app.use(express.static(path.join(__dirname, "../client/build")));
 

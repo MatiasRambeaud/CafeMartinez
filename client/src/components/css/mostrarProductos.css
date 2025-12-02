@@ -1,25 +1,48 @@
 .menu-container {
     max-width: 480px;
     margin: 0 auto;
-    padding: 20px 16px;
+    padding: 0 16px 20px 16px;
     font-family: 'Georgia', serif;
-    background-color: #1f1a17;
-    color: #f7f7f7;
+    background-color: transparent; /* inherit pastel page bg */
+    color: var(--text-general);
 }
 
 .titulo {
     font-size: 2.2rem;
-    color: #d4af37;
+    color: #000;
     margin-bottom: 12px;
+}
+
+/* Top main sections navigation (Combos, Cafetería, Menú) */
+.secciones-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 0;
+    margin-bottom: 16px;
+    justify-content: center;
+    background: transparent;
 }
 
 .categoria-nav {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    padding: 16px 0;
+    padding: 0 0 16px 0;
     margin-bottom: 24px;
     justify-content: center;
+    border-top: none;
+    position: relative;
+}
+
+.categoria-nav::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px; /* sit just below content padding */
+    height: 2px;
+    background: linear-gradient(to bottom, #000000 0%, #000000 50%, var(--gold) 50%, var(--gold) 100%);
 }
 
 .categoria-btn {
@@ -27,30 +50,42 @@
     padding: 10px 20px;
     font-size: 1.4rem;
     font-weight: 600;
-    background: linear-gradient(135deg, #d4af37, #c49000);
-    color: #1f1a17;
-    border: none;
+    background: #ffd3e0; /* pastel pink */
+    color: #000;
+    border: 1px solid #000;
     border-radius: 30px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .categoria-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    transform: scale(1.02);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .categoria-section {
     margin-bottom: 50px;
 }
 
+/* Subtle spacing below banner before Combos section */
+section#Combos.categoria-section {
+    margin-top: 12px;
+}
+
 .categoria-titulo {
     font-size: 2.24rem;
-    color: #d4af37;
+    color: #000;
     margin-bottom: 20px;
     text-align: center;
     text-transform: capitalize;
+}
+
+/* Clean title area for Combos: no frame, shadow, or background */
+section#Combos .categoria-titulo {
+    background: transparent;
+    border: none;
+    box-shadow: none;
 }
 
 .menu-grid {
@@ -59,12 +94,97 @@
     gap: 16px;
 }
 
+/* Subcategory styles */
+.categoria-section > .menu-grid {
+    margin: 20px 0;
+    background-color: #fff9e6; /* Fondo más claro para el contenedor general */
+    border-radius: 12px;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: 1px solid #d4af37; /* Borde dorado para el contenedor general */
+}
+
+.subcat-block { 
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+    border-bottom: 1px dashed #d4af37; /* Línea divisoria sutil entre subcategorías */
+    background-color: #ffecb3; /* Fondo amarillo pastel para cada subcategoría */
+}
+
+/* Eliminar borde inferior del último subcat-block */
+.subcat-block:last-child {
+    border-bottom: none;
+}
+
+.subcat-title {
+    font-size: 1.6rem !important;
+    color: #4e342e; /* Marrón oscuro más intenso para mejor contraste */
+    margin: 0;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #ffe082, #ffd54f); /* Degradado más oscuro */
+    border-bottom: 1px solid #d4af37; /* Línea dorada más suave */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700 !important;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.subcat-title::before {
+    content: "•";
+    color: #ff8f00; /* Naranja para el punto decorativo */
+    font-size: 2rem;
+    line-height: 1;
+}
+
+/* Ajustes para el contenido dentro de las subcategorías */
+.subcat-block .menu-grid {
+    padding: 15px;
+    background-color: #fff8e1; /* Fondo un poco más cálido */
+}
+
+/* Efecto hover para la tarjeta de subcategoría */
+.subcat-block:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    background-color: #ffe0b2; /* Color ligeramente más oscuro al hacer hover */
+}
+
+/* Estilo para la sección "Otros" */
+.subcat-block:has(.subcat-title:contains('Otros')) {
+    background-color: #f5f5f5;
+    border: 1px solid #e0e0e0;
+}
+
+.subcat-block:has(.subcat-title:contains('Otros')) .subcat-title {
+    background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+    color: #424242;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.subcat-block:has(.subcat-title:contains('Otros')) .menu-grid {
+    background-color: #f5f5f5;
+}
+
+.collapse {
+    max-height: 0;
+    transition: max-height 0.35s ease;
+}
+.collapse.show {
+    max-height: 1200px; /* large enough for list */
+}
+
  :root,
 html,
 body {
     margin: 0;
     padding: 0;
-    background-color: #1f1a17;
+    background-color: transparent; /* use global pastel from App.css */
     min-height: 100vh;
 }
 
@@ -126,4 +246,30 @@ body {
     opacity: 0;
     transform: scale(0.8);
     pointer-events: none;
+}
+
+/* Mini subsections layout (consistent with existing style) */
+.mini-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.mini-section {
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    padding: 12px 14px;
+}
+
+.mini-titulo {
+    font-size: 1.6rem;
+    color: #000;
+    margin: 0 0 8px 0;
+    text-align: center;
+}
+
+.mini-content {
+    min-height: 24px;
 }

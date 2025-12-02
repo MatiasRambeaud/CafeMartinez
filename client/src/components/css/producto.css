@@ -1,16 +1,42 @@
 .producto-card {
-    background-color: #2c241c;
-    border: 1px solid #d4af37;
+    background-color: #f8c9d4;
+    border: 1px solid #d4af37; /* Borde dorado */
     border-radius: 14px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
     width: 100%;
     display: flex;
     overflow: hidden;
+    position: relative;
+}
+
+/* Efecto de brillo dorado en el borde al pasar el mouse */
+.producto-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 14px;
+    padding: 1px;
+    background: linear-gradient(45deg, #d4af37, #f9f0a0, #d4af37);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.producto-card:hover::before {
+    opacity: 1;
 }
 
 .producto-card:hover {
-    transform: scale(1.01);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2), 0 0 0 1px #d4af37;
+    z-index: 1;
 }
 
 .con-imagen {
@@ -37,19 +63,19 @@
     flex-direction: column;
     justify-content: center;
     flex: 1;
-    color: #f8f8f8;
+    color: #000;
 }
 
 .producto-titulo {
     font-size: 1.35rem;
     margin: 0;
-    color: #f8f8f8;
+    color: #000;
     word-break: break-word;
 }
 
 .producto-descripcion {
     font-size: 1rem;
-    color: #c7c7c7;
+    color: #000;
     font-style: italic;
     line-height: 1.2;
     margin-top: 2px;
@@ -57,13 +83,15 @@
 
 .linea-precio {
     border: 0;
-    border-top: 1px solid #d4af37;
-    margin: 6px 0;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(212,175,55,0.3) 0%, #d4af37 50%, rgba(212,175,55,0.3) 100%);
+    margin: 8px 0;
+    border-radius: 2px;
 }
 
 .producto-precio {
     font-size: 1.35rem;
-    color: #d4af37;
+    color: #000;
     font-weight: bold;
     font-family: 'Segoe UI', sans-serif;
     margin: 0;
@@ -80,7 +108,7 @@
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    color: #e3c46b;
+    color: #000;
     font-size: 1.35rem;
     font-weight: 600;
 }
@@ -108,12 +136,12 @@
 .nombre-variacion {
     font-weight: 700;
     margin-bottom: 4px;
-    color: #f8f8f8;
+    color: #000;
     font-size: 1.5rem;
 }
 
 .precio-variacion {
     font-weight: 600;
-    color: #d4af37;
+    color: #000;
     font-size: 1.35rem;
 }

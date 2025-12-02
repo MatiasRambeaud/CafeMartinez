@@ -4,18 +4,29 @@ import "./css/mostrarProductos.css";
 
 export default function MostrarProductos() {
   const API_BASE = `${process.env.REACT_APP_PROXY}/api/products`;
+  const API_CAT = `${process.env.REACT_APP_PROXY}/api/categories`;
+  const API_SUB = `${process.env.REACT_APP_PROXY}/api/subcategories`;
 
   useEffect(() => {
-    document.title = "Café Martines - Menú";
+    document.title = "Neldo Martinez - Menú";
   }, []);
 
   const [productos, setProductos] = useState([]);
   const [mostrarFlecha, setMostrarFlecha] = useState(false);
+  const [categorias, setCategorias] = useState([]);
+  const [subcategorias, setSubcategorias] = useState([]);
+  // Mostramos todo expandido por defecto, sin funcionalidad de colapso
 
   useEffect(() => {
     fetch(API_BASE)
       .then((res) => res.json())
       .then((json) => setProductos(json.payload));
+    fetch(API_CAT)
+      .then((res) => res.json())
+      .then((json) => setCategorias(json.payload || []));
+    fetch(API_SUB)
+      .then((res) => res.json())
+      .then((json) => setSubcategorias(json.payload || []));
   }, []);
 
   useEffect(() => {
@@ -32,20 +43,38 @@ export default function MostrarProductos() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const productosPorCategoria = productos.reduce((acc, producto) => {
-    if (!acc[producto.category]) acc[producto.category] = [];
-    acc[producto.category].push(producto);
+  // Organizar productos por categoría (id) y subcategoría
+  const productosPorJerarquia = productos.reduce((acc, p) => {
+    const cId = p.categoryId || "none";
+    if (!acc[cId]) acc[cId] = { noSub: [], bySub: {} };
+    if (p.subcategoryId) {
+      if (!acc[cId].bySub[p.subcategoryId]) acc[cId].bySub[p.subcategoryId] = [];
+      acc[cId].bySub[p.subcategoryId].push(p);
+    } else {
+      acc[cId].noSub.push(p);
+    }
     return acc;
   }, {});
 
   const scrollToCategoria = (id) => {
     const section = document.getElementById(id);
     if (section) {
-      section.scrollIntoView({ behavior: "smooth", block: "center" });
+      const offset = 140; // compensar el banner y margen superior
+      const top = section.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top, behavior: "smooth" });
     }
   };
   
   const phone = process.env.REACT_APP_PHONE;
+
+  // Detectar categoría llamada "Combos" si existe (por compatibilidad)
+  const combosCategory = categorias.find((c) => c.name === "Combos");
+  const combos = combosCategory
+    ? (productosPorJerarquia[combosCategory._id]?.noSub || [])
+        .concat(
+          Object.values(productosPorJerarquia[combosCategory._id]?.bySub || {}).flat()
+        )
+    : [];
 
   const openWhatsApp = () => {
     const isMobile = /Android|iPhone/i.test(navigator.userAgent);
@@ -62,27 +91,75 @@ export default function MostrarProductos() {
 
 
         <nav className="categoria-nav">
-          {Object.keys(productosPorCategoria).map((categoria) => (
+          {categorias.map((c) => (
             <button
-              key={categoria}
+              key={c._id}
               className="categoria-btn"
-              onClick={() => scrollToCategoria(categoria)}
+              onClick={() => scrollToCategoria(`cat-${c._id}`)}
             >
-              {categoria}
+              {c.name}
             </button>
           ))}
         </nav>
 
-        {Object.entries(productosPorCategoria).map(([categoria, items]) => (
-          <section key={categoria} id={categoria} className="categoria-section">
-            <h2 className="categoria-titulo">{categoria}</h2>
+        {combos.length > 0 && (
+          <section id="cat-combos" className="categoria-section">
+            <h2 className="categoria-titulo">Combos</h2>
             <div className="menu-grid">
-              {items.map((producto) => (
+              {combos.map((producto) => (
                 <Producto key={producto._id} producto={producto} />
               ))}
             </div>
           </section>
-        ))}
+        )}
+
+        {categorias
+          .filter((c) => c.name !== "Combos")
+          .map((c) => {
+            const group = productosPorJerarquia[c._id] || { noSub: [], bySub: {} };
+            const subcatsDeCat = subcategorias.filter((s) => String(s.categoryId) === String(c._id));
+            const tieneSubcats = subcatsDeCat.length > 0;
+            return (
+              <section key={c._id} id={`cat-${c._id}`} className="categoria-section">
+                <h2 className="categoria-titulo">{c.name}</h2>
+                {!tieneSubcats && (
+                  <div className="menu-grid">
+                    {group.noSub.map((producto) => (
+                      <Producto key={producto._id} producto={producto} />
+                    ))}
+                  </div>
+                )}
+                {tieneSubcats && (
+                  <div className="menu-grid">
+                    {subcatsDeCat.map((s) => {
+                      const items = group.bySub[s._id] || [];
+                      return (
+                        <div key={s._id} className="subcat-block">
+                          <h3 className="subcat-title">{s.name}</h3>
+                          <div className="menu-grid" style={{ paddingTop: 8 }}>
+                            {items.map((producto) => (
+                              <Producto key={producto._id} producto={producto} />
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {/* También mostrar productos sin subcategoría en esta categoría */}
+                    {group.noSub.length > 0 && (
+                      <div className="subcat-block">
+                        <h3 className="subcat-title">Otros</h3>
+                        <div className="menu-grid">
+                          {group.noSub.map((producto) => (
+                            <Producto key={producto._id} producto={producto} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </section>
+            );
+          })}
         <a
           href={`https://api.whatsapp.com/send?phone=${process.env.REACT_APP_PHONE}`}
           className="whatsapp-float"
@@ -90,7 +167,7 @@ export default function MostrarProductos() {
           rel="noopener noreferrer"
         >
           <img
-            src="/images/whatsapp_logo.png"
+            src="/logo/whatsapp_logo.png"
             alt="WhatsApp"
             className="whatsapp-icon"
           />

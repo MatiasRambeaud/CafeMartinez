@@ -1,0 +1,481 @@
+/* Pastel color system */
+:root {
+  --pastel-pink: #f8cfe5;
+  --pastel-peach: #ffd3b6;
+  --pastel-cream: #fff5e6;
+  --pastel-skin: #f6e2d9;
+  --pastel-yellow: #fff8dc;
+  --gold: #d4af37;
+  --beige: #efe5cc;
+
+  --text-primary: #000000;
+  --text-muted: #333333;
+  --text-general: #000000;
+  --accent: #f5a7c0; /* slightly stronger pastel pink for accents */
+}
+
+/* Global base (visual-only; does not alter layout) */
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background: #fbe5d6; /* pastel skin page background */
+  color: var(--text-general);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Links */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover { color: #000; }
+
+/* Headings keep structure; only color softened */
+h1, h2, h3, h4, h5, h6 { color: #000; }
+
+/* Common surfaces (non-structural style changes only) */
+header, nav, footer { background: var(--pastel-skin); color: #000; }
+
+/* Buttons: gentle pastel background without changing size/layout */
+button,
+input[type="button"],
+input[type="submit"] {
+  background: #ffd3e0;
+  color: #000;
+  border: 1px solid #000;
+  border-radius: 8px;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+
+button:hover,
+input[type="button"]:hover,
+input[type="submit"]:hover {
+  background: var(--pastel-peach);
+  color: #000;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* Inputs: soft backgrounds and subtle borders */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+select,
+textarea {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 8px;
+  color: var(--text-primary);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Tables (visual only) */
+table {
+  background: #ffffff;
+  border-collapse: collapse;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th {
+  background: var(--pastel-skin);
+  color: #000;
+}
+
+tr:nth-child(even) {
+  background: #fffaf3; /* very light cream zebra */
+}
+
+/* Cards/panels if present */
+.card, .panel, .box, .container-box {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+/* Banner styles */
+.banner-wrapper {
+  width: 100%;
+  background: #000000;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* center banner content */
+  padding: 24px 12px 0; /* remove gap below banner */
+}
+
+.banner-text {
+  text-align: center;
+  line-height: 1.1;
+}
+
+.brand-title {
+  font-family: "Georgia", "Times New Roman", serif;
+  font-weight: 800;
+  letter-spacing: 2px;
+  font-size: clamp(28px, 6vw, 56px);
+  color: #FFFFFF;
+}
+
+.brand-subtitle {
+  font-family: "Georgia", "Times New Roman", serif;
+  font-variant: small-caps;
+  font-weight: 500;
+  letter-spacing: 4px;
+  margin-top: 6px;
+  font-size: clamp(14px, 3.5vw, 24px);
+  color: #FFFFFF;
+}
+
+/* Thin gold separator directly under banner */
+.banner-separator {
+  height: 5px;
+  background: #d4af37;
+  width: 100%;
+  margin: 0;
+}
+
+/* Decoration hover images */
+.decor-image-popup {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  padding: 12px;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+  margin-top: 10px;
+  max-width: 400px;
+  border: 2px solid var(--gold);
+}
+
+.decor-image-popup.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.decor-image-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 8px;
+  width: 300px;
+  height: 200px;
+}
+
+.decor-image-grid img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+  transition: transform 0.2s ease;
+}
+
+.decor-image-grid img:hover {
+  transform: scale(1.05);
+}
+
+.decor-link-area {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 18px 16px 10px;
+  background: transparent;
+}
+
+.decor-link-area .decor-link {
+  display: inline-block;
+  padding: 16px 24px;
+  background: #fff8dc;
+  color: #000000;
+  font-weight: 900;
+  font-size: 1.5em;
+  letter-spacing: 0.4px;
+  box-shadow: 
+    0 8px 24px rgba(0,0,0,0.1),
+    inset 0 2px 4px rgba(255,255,255,0.6),
+    inset 0 -2px 4px rgba(218,165,32,0.2);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+  min-width: 200px;
+  text-align: center;
+  /* Fully circular border design */
+  border: 3px solid var(--gold);
+  border-radius: 50px;
+  overflow: hidden;
+}
+
+/* Shimmer animation for hover effect */
+.decor-link-area .decor-link::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,215,0,0.4),
+    rgba(255,215,0,0.6),
+    rgba(255,215,0,0.8),
+    rgba(255,215,0,0.6),
+    rgba(255,215,0,0.4),
+    transparent
+  );
+  transition: left 1.2s ease;
+  z-index: -1;
+}
+
+.decor-link-area .decor-link:hover::before {
+  left: 100%;
+}
+
+/* Reverse shimmer animation on unhover */
+.decor-link-area .decor-link:not(:hover)::before {
+  transition: left 0.8s ease;
+  left: -100%;
+}
+
+.decor-link-area .decor-link:hover {
+  transform: translateY(-2px) scale(1.02);
+  background: linear-gradient(145deg, #fff8dc, #ffd700, #ffed4e, #fff8dc);
+  box-shadow: 
+    0 12px 28px rgba(0,0,0,0.12),
+    inset 0 3px 6px rgba(255,255,255,0.9),
+    inset 0 -3px 6px rgba(255,215,0,0.5),
+    0 0 25px rgba(255,215,0,0.4);
+}
+
+/* Flowers attached to button borders - all sides */
+.decor-link-area .decor-link::after,
+.decor-link-area .decor-link .border-flower,
+.decor-link-area .decor-link .border-flower-right,
+.decor-link-area .decor-link .border-flower-bottom-left,
+.decor-link-area .decor-link .border-flower-bottom-right,
+.decor-link-area .decor-link .border-flower-left,
+.decor-link-area .decor-link .border-flower-top-center,
+.decor-link-area .decor-link .border-flower-top-left-2,
+.decor-link-area .decor-link .border-flower-top-right-2,
+.decor-link-area .decor-link .border-flower-bottom-center,
+.decor-link-area .decor-link .border-flower-left-2,
+.decor-link-area .decor-link .border-flower-right-2,
+.decor-link-area .decor-link .border-flower-top-left-3,
+.decor-link-area .decor-link .border-flower-top-right-3,
+.decor-link-area .decor-link .border-flower-bottom-left-3,
+.decor-link-area .decor-link .border-flower-bottom-right-3,
+.decor-link-area .decor-link .border-flower-left-3,
+.decor-link-area .decor-link .border-flower-right-3,
+.decor-link-area .decor-link .border-flower-top-3,
+.decor-link-area .decor-link .border-flower-bottom-3 {
+  position: absolute;
+  font-size: 28px;
+  filter: drop-shadow(0 3px 5px rgba(0,0,0,0.3));
+  z-index: 2;
+}
+
+/* Individual flower positioning and types */
+.decor-link-area .decor-link::after {
+  content: "🌹";
+  top: -15px;
+  right: 10px;
+  transform: rotate(15deg);
+}
+
+.decor-link-area .decor-link .border-flower {
+  content: "🌸";
+  top: -15px;
+  left: 10px;
+  transform: rotate(-15deg);
+}
+
+.decor-link-area .decor-link .border-flower-right {
+  content: "🌺";
+  top: 50%;
+  right: -15px;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.decor-link-area .decor-link .border-flower-left {
+  content: "🌷";
+  top: 50%;
+  left: -15px;
+  transform: translateY(-50%) rotate(-45deg);
+}
+
+.decor-link-area .decor-link .border-flower-bottom-left {
+  content: "🌻";
+  bottom: -15px;
+  left: 15px;
+  transform: rotate(-10deg);
+}
+
+.decor-link-area .decor-link .border-flower-bottom-right {
+  content: "🌼";
+  bottom: -15px;
+  right: 15px;
+  transform: rotate(10deg);
+}
+
+.decor-link-area .decor-link .border-flower-top-center {
+  content: "🌸";
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%) rotate(0deg);
+  font-size: 24px;
+}
+
+/* Additional flowers - larger */
+.decor-link-area .decor-link .border-flower-top-left-2 {
+  content: "🌹";
+  top: -12px;
+  left: 25%;
+  transform: translateX(-50%) rotate(-5deg);
+  font-size: 22px;
+}
+
+.decor-link-area .decor-link .border-flower-top-right-2 {
+  content: "🌺";
+  top: -12px;
+  left: 75%;
+  transform: translateX(-50%) rotate(5deg);
+  font-size: 22px;
+}
+
+.decor-link-area .decor-link .border-flower-bottom-center {
+  content: "🌷";
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%) rotate(0deg);
+  font-size: 24px;
+}
+
+.decor-link-area .decor-link .border-flower-left-2 {
+  content: "🌻";
+  top: 30%;
+  left: -12px;
+  transform: translateY(-50%) rotate(-30deg);
+  font-size: 20px;
+}
+
+.decor-link-area .decor-link .border-flower-right-2 {
+  content: "🌼";
+  top: 30%;
+  right: -12px;
+  transform: translateY(-50%) rotate(30deg);
+  font-size: 20px;
+}
+
+/* Even more flowers - extra large */
+.decor-link-area .decor-link .border-flower-top-left-3 {
+  content: "🌸";
+  top: -10px;
+  left: 15%;
+  transform: translateX(-50%) rotate(-8deg);
+  font-size: 26px;
+}
+
+.decor-link-area .decor-link .border-flower-top-right-3 {
+  content: "🌹";
+  top: -10px;
+  left: 85%;
+  transform: translateX(-50%) rotate(8deg);
+  font-size: 26px;
+}
+
+.decor-link-area .decor-link .border-flower-bottom-left-3 {
+  content: "🌺";
+  bottom: -12px;
+  left: 30%;
+  transform: translateX(-50%) rotate(-12deg);
+  font-size: 22px;
+}
+
+.decor-link-area .decor-link .border-flower-bottom-right-3 {
+  content: "🌷";
+  bottom: -12px;
+  left: 70%;
+  transform: translateX(-50%) rotate(12deg);
+  font-size: 22px;
+}
+
+.decor-link-area .decor-link .border-flower-left-3 {
+  content: "🌻";
+  top: 70%;
+  left: -12px;
+  transform: translateY(-50%) rotate(-60deg);
+  font-size: 20px;
+}
+
+.decor-link-area .decor-link .border-flower-right-3 {
+  content: "🌼";
+  top: 70%;
+  right: -12px;
+  transform: translateY(-50%) rotate(60deg);
+  font-size: 20px;
+}
+
+.decor-link-area .decor-link .border-flower-top-3 {
+  content: "🌸";
+  top: -18px;
+  left: 40%;
+  transform: translateX(-50%) rotate(3deg);
+  font-size: 30px;
+}
+
+.decor-link-area .decor-link .border-flower-bottom-3 {
+  content: "🌹";
+  bottom: -18px;
+  left: 60%;
+  transform: translateX(-50%) rotate(-3deg);
+  font-size: 30px;
+}
+
+/* Additional flowers for all borders */
+
+/* Container flowers for bottom */
+.decor-link-area::before,
+.decor-link-area::after {
+  content: "🌹";
+  position: absolute;
+  font-size: 18px;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15));
+  z-index: 0;
+}
+
+.decor-link-area::before {
+  bottom: -10px;
+  left: 15px;
+  transform: rotate(10deg);
+}
+
+.decor-link-area::after {
+  bottom: -10px;
+  right: 15px;
+  transform: rotate(-10deg);
+}
+
+/* Subtle separators if any horizontal rules are used */
+hr {
+  border: none;
+  height: 1px;
+  background: var(--gold);
+}
