@@ -46,7 +46,6 @@ const AdminPanel = () => {
     subcategoryName: "",
     assignType: "category"
   });
-  const [buttonText, setButtonText] = useState("Página de decoración");
 
   const fetchProducts = async () => {
     try {
@@ -78,47 +77,11 @@ const AdminPanel = () => {
     }
   };
 
-  const fetchButtonText = async () => {
-    try {
-      const res = await fetch(`${process.env.REACT_APP_PROXY}/api/decor-images/button`);
-      const data = await res.json();
-      if (data.payload && data.payload.text) {
-        setButtonText(data.payload.text);
-      }
-    } catch {
-      // ignore
-    }
-  };
-
   useEffect(() => {
     fetchProducts();
     fetchCategories();
     fetchSubcategories();
-    fetchButtonText();
   }, []);
-
-  const handleUpdateButtonText = async () => {
-    if (!buttonText.trim()) {
-      alert("Por favor ingrese un texto para el botón");
-      return;
-    }
-
-    try {
-      const res = await fetch(`${process.env.REACT_APP_PROXY}/api/decor-images/button`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ text: buttonText.trim() })
-      });
-      if (res.ok) {
-        showNotification("Texto del botón actualizado exitosamente", "success");
-      } else {
-        alert("Error al actualizar texto del botón");
-      }
-    } catch {
-      alert("Error al actualizar texto del botón");
-    }
-  };
 
   const handleEditClick = (product) => {
     setEditingId(product._id);
@@ -1113,27 +1076,6 @@ return (
             </button>
           </div>
         </form>
-      </div>
-
-      {/* Sección: Texto del botón de decoración */}
-      <div className="decor-images-section">
-        <h2>Texto del botón de decoración</h2>
-        <div className="decor-button-form">
-          <h3>Editar texto del botón</h3>
-          <div className="form-group">
-            <label>Texto del botón de decoración</label>
-            <input
-              type="text"
-              value={buttonText}
-              onChange={(e) => setButtonText(e.target.value)}
-              placeholder="Ej: Página de decoración"
-              required
-            />
-          </div>
-          <button type="button" onClick={handleUpdateButtonText} className="btn-primary">
-            Actualizar Texto
-          </button>
-        </div>
       </div>
 
       <div className="search-container">

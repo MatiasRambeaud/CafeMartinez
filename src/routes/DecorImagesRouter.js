@@ -69,7 +69,7 @@ let decorImages = [
 ];
 
 // Button text storage
-let buttonText = { text: "Página de decoración" };
+let buttonText = { text: "NELDO MARTINEZ" };
 
 // GET button text
 router.get("/button", (req, res) => {

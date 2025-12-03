@@ -102,7 +102,25 @@ section#Combos .categoria-titulo {
     padding: 0;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    border: 1px solid #d4af37; /* Borde dorado para el contenedor general */
+    border: 2px solid #d4af37; /* Borde dorado un poco más grueso */
+}
+
+/* Marco dorado especial para la sección de Combos, similar al de las tarjetas */
+#cat-combos .menu-grid {
+    position: relative;
+}
+
+#cat-combos .menu-grid::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    padding: 2px;
+    background: linear-gradient(45deg, #d4af37, #f9f0a0, #d4af37);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
 }
 
 .subcat-block { 

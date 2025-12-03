@@ -10,7 +10,7 @@ import "./App.css";
 const App = () => {
   const [decorImages, setDecorImages] = useState([]);
   const [showImages, setShowImages] = useState(false);
-  const [buttonText, setButtonText] = useState("Página de decoración");
+  const [buttonText] = useState("NELDO MARTINEZ");
 
   useEffect(() => {
     const loadDecorImages = () => {
@@ -25,22 +25,7 @@ const App = () => {
       setDecorImages(localImages);
     };
 
-    const fetchButtonText = async () => {
-      try {
-        const res = await fetch(`${process.env.REACT_APP_PROXY}/api/decor-images/button`, {
-          credentials: "include"
-        });
-        const data = await res.json();
-        if (data.payload && data.payload.text) {
-          setButtonText(data.payload.text);
-        }
-      } catch (error) {
-        console.log("Error fetching button text:", error);
-      }
-    };
-    
     loadDecorImages();
-    fetchButtonText();
   }, []);
 
   return (

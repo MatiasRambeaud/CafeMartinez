@@ -1,6 +1,6 @@
 .producto-card {
     background-color: #f8c9d4;
-    border: 1px solid #d4af37; /* Borde dorado */
+    border: 2px solid #d4af37; /* Borde dorado más grueso */
     border-radius: 14px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
@@ -19,7 +19,7 @@
     right: 0;
     bottom: 0;
     border-radius: 14px;
-    padding: 1px;
+    padding: 2px; /* marco dorado más marcado */
     background: linear-gradient(45deg, #d4af37, #f9f0a0, #d4af37);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
@@ -41,7 +41,7 @@
 
 .con-imagen {
     flex-direction: row;
-    height: 120px;
+    min-height: 140px; /* aumenta un poco la altura para encuadrar mejor */
 }
 
 .sin-imagen {
@@ -51,9 +51,9 @@
 }
 
 .producto-imagen {
-    width: 120px;
-    height: 100%;
-    object-fit: cover;
+    width: 190px;       /* imagen un poco más grande */
+    height: 140px;      /* igual a la altura mínima de la tarjeta */
+    object-fit: cover;  /* llena todo el alto; puede recortar un poco pero sin franjas vacías */
     flex-shrink: 0;
 }
 
@@ -64,6 +64,12 @@
     justify-content: center;
     flex: 1;
     color: #000;
+}
+
+/* Para las tarjetas con imagen, distribuir mejor el espacio vertical
+   para que título, descripción, línea dorada y precio queden bien encuadrados */
+.producto-card.con-imagen .producto-info {
+    justify-content: space-between;
 }
 
 .producto-titulo {
@@ -85,7 +91,7 @@
     border: 0;
     height: 2px;
     background: linear-gradient(90deg, rgba(212,175,55,0.3) 0%, #d4af37 50%, rgba(212,175,55,0.3) 100%);
-    margin: 8px 0;
+    margin: 6px 0 8px 0; /* un poco más pegada a la descripción para que se vea bien la división */
     border-radius: 2px;
 }
 
