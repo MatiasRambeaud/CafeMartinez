@@ -18,7 +18,10 @@ const loginUser = async(req, res) => {
         }
         return res.sendPayload(null,req.user)
     }
+    // Si no hay usuario autenticado, devolver acceso denegado
+    return res.sendUnauthorized("Acceso denegado al panel de admin. Verifique el nombre o la contraseña.");
 }
+
 const current = async(req, res) => {
     if (req.user) {
         res.sendPayload(req.user);

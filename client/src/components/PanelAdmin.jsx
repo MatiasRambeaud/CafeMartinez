@@ -46,6 +46,7 @@ const AdminPanel = () => {
     subcategoryName: "",
     assignType: "category"
   });
+  const [newProductImageFile, setNewProductImageFile] = useState(null);
 
   const fetchProducts = async () => {
     try {
@@ -503,6 +504,11 @@ const AdminPanel = () => {
       if (variations.length > 0) {
         formData.append('variations', JSON.stringify(variations));
       }
+
+      // Imagen al crear producto (opcional)
+      if (newProductImageFile instanceof File) {
+        formData.append('image', newProductImageFile);
+      }
       
       const response = await fetch(API_BASE, {
         method: 'POST',
@@ -519,9 +525,12 @@ const AdminPanel = () => {
           status: true,
           categoryId: '',
           subcategoryId: '',
+          categoryName: '',
+          subcategoryName: '',
           assignType: 'category'
         });
         setVariations([]);
+        setNewProductImageFile(null);
         await fetchProducts();
         showNotification('Producto creado exitosamente');
       } else {
@@ -991,6 +1000,7 @@ return (
                 accept="image/*" 
                 id="product-image"
                 className="file-input"
+                onChange={(e) => setNewProductImageFile(e.target.files[0] || null)}
               />
               <label htmlFor="product-image" className="file-label">
                 <i className="fas fa-upload"></i>
@@ -1202,40 +1212,38 @@ return (
                         className="edit-input narrow"
                       />
                     </p>
-                    {!p.image &&(
-                      <p>
-                        <strong>Imagen:</strong>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) =>
-                            setEditedProduct((prev) => ({
-                              ...prev,
-                              newImageFile: e.target.files[0], // 
-                            }))
-                          }
-                        />
-                      </p>
-                    )}
-                    {p.image && (
-                      <p>
-                        <strong>Imagen:</strong>
-                        {editedProduct.image}
-                        <button
-                          type="button"
-                          className="btn-inline danger"
-                          onClick={() =>
-                            setEditedProduct((prev) => ({
-                              ...prev,
-                              image: null,
-                              removeImage: true
-                            }))
-                          }
-                        >
-                          ❌
-                        </button>
-                      </p>
-                    )}
+                    <p>
+                      <strong>Imagen:</strong>
+                      {p.image && (
+                        <>
+                          {editedProduct.image}
+                          <button
+                            type="button"
+                            className="btn-inline danger"
+                            onClick={() =>
+                              setEditedProduct((prev) => ({
+                                ...prev,
+                                image: null,
+                                removeImage: true
+                              }))
+                            }
+                          >
+                            ❌
+                          </button>
+                        </>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) =>
+                          setEditedProduct((prev) => ({
+                            ...prev,
+                            newImageFile: e.target.files[0] || null,
+                          }))
+                        }
+                        style={{ display: "block", marginTop: "6px" }}
+                      />
+                    </p>
                     <label className="switch-label">
                       Activo
                       <label className="switch">

@@ -11,11 +11,13 @@ const Login = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setSuccess(null);
 
     try {
       const res = await fetch(`${process.env.REACT_APP_PROXY}/api/sessions/login`, {
@@ -28,9 +30,12 @@ const Login = () => {
       const data = await res.json();
 
       if (data.status === "success") {
-        navigate("/panel");
+        setSuccess("Acceso permitido al panel de admin.");
+        setTimeout(() => {
+          navigate("/panel");
+        }, 1000);
       } else {
-        setError(data.error || "Datos de login incorrectos");
+        setError(data.error || data.message || "Acceso denegado al panel de admin. Verifique el nombre o la contraseña.");
       }
     } catch (err) {
       console.error(err);
@@ -43,7 +48,19 @@ const Login = () => {
       <form onSubmit={handleSubmit} className="login-form" noValidate>
         <h2 className="login-title">Iniciar sesión</h2>
 
-        {error && <p className="login-error">{error}</p>}
+        {error && (
+          <div className="login-error login-message-block">
+            <strong>Acceso denegado al panel de admin</strong>
+            <p>{error}</p>
+          </div>
+        )}
+
+        {success && (
+          <div className="login-success login-message-block">
+            <strong>Acceso permitido al panel de admin</strong>
+            <p>{success}</p>
+          </div>
+        )}
 
         <div className="login-field">
           <label className="login-label" htmlFor="name">Nombre</label>
