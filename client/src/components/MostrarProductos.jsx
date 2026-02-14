@@ -20,13 +20,25 @@ export default function MostrarProductos() {
   useEffect(() => {
     fetch(API_BASE)
       .then((res) => res.json())
-      .then((json) => setProductos(json.payload));
+      .then((json) => {
+        console.log("/api/products response:", json);
+        const data = Array.isArray(json) ? json : json.payload || [];
+        setProductos(data);
+      });
     fetch(API_CAT)
       .then((res) => res.json())
-      .then((json) => setCategorias(json.payload || []));
+      .then((json) => {
+        console.log("/api/categories response:", json);
+        const data = Array.isArray(json) ? json : json.payload || [];
+        setCategorias(data);
+      });
     fetch(API_SUB)
       .then((res) => res.json())
-      .then((json) => setSubcategorias(json.payload || []));
+      .then((json) => {
+        console.log("/api/subcategories response:", json);
+        const data = Array.isArray(json) ? json : json.payload || [];
+        setSubcategorias(data);
+      });
   }, []);
 
   useEffect(() => {
@@ -44,7 +56,7 @@ export default function MostrarProductos() {
   };
 
   // Organizar productos por categoría (id) y subcategoría
-  const productosPorJerarquia = productos.reduce((acc, p) => {
+  const productosPorJerarquia = (productos || []).reduce((acc, p) => {
     const cId = p.categoryId || "none";
     if (!acc[cId]) acc[cId] = { noSub: [], bySub: {} };
     if (p.subcategoryId) {
