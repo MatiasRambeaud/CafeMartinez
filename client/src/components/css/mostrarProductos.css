@@ -7,6 +7,31 @@
     color: var(--text-general);
 }
 
+/* Executive Menu special styles */
+.executive-menu-structure {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.executive-menu-section {
+    background: white;
+    border: 2px solid var(--gold);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.executive-menu-subtitle {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-general);
+    margin: 0 0 12px 0;
+    text-align: center;
+    border-bottom: 1px solid var(--gold);
+    padding-bottom: 8px;
+}
+
 .titulo {
     font-size: 2.2rem;
     color: #000;

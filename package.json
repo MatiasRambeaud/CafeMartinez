@@ -18,7 +18,8 @@
     "client:test": "cd client && npm test",
     "client:eject": "cd client && npm run eject",
     "dev": "concurrently \"cross-env ENV=.env.development npm run server\" \"npm run client\"",
-    "live": "concurrently \"cross-env ENV=.env.production npm run server\" \"npm run client\""
+    "live": "concurrently \"cross-env ENV=.env.production npm run server\" \"npm run client\"",
+    "ingest-menu": "cross-env ENV=.env.development node scripts/ingestMenu.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -31,7 +32,8 @@
     "multer": "^2.0.2",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

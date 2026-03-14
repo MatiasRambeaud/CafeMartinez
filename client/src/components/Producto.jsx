@@ -32,15 +32,19 @@ export default function Producto({ producto }) {
         <hr className="linea-precio" />
 
         {!tieneVariaciones && (
-          <p className="producto-precio">${producto.price.toFixed(2)}</p>
+          producto.price !== null && producto.price !== undefined ? (
+            <p className="producto-precio">${producto.price.toFixed(2)}</p>
+          ) : (
+            <p className="producto-precio combo-item">Combo</p>
+          )
         )}
 
         {tieneVariaciones && (
           <ul className="producto-variaciones-horizontal">
             {producto.variations.map((v, i) => (
               <li key={i} className="variacion-item">
-                <div className="nombre-variacion">{v.nombre}</div>
-                <div className="precio-variacion">${Number(v.precio).toFixed(2)}</div>
+                <div className="nombre-variacion">{v.size}</div>
+                <div className="precio-variacion">${Number(v.price).toFixed(2)}</div>
               </li>
             ))}
           </ul>

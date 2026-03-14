@@ -22,17 +22,6 @@ const AdminPanel = () => {
   const [newProdAssignType, setNewProdAssignType] = useState("category"); // "category" | "subcategory"
   const [newProdCategoryId, setNewProdCategoryId] = useState("");
   const [newProdSubcategoryId, setNewProdSubcategoryId] = useState("");
-  const [newCategory, setNewCategory] = useState({ name: "", description: "" });
-  const [newSubcategory, setNewSubcategory] = useState({ name: "", description: "", categoryId: "" });
-  const [editingCategory, setEditingCategory] = useState(null);
-  const [editingSubcategory, setEditingSubcategory] = useState(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState({ show: false, type: '', id: '', name: '' });
-  const [contextMenu, setContextMenu] = useState({ show: false, x: 0, y: 0, type: '', item: null });
-  const [editingItem, setEditingItem] = useState(null);
-  const [showCategorySelect, setShowCategorySelect] = useState(false);
-  const [showSubcategorySelect, setShowSubcategorySelect] = useState(false);
-  const [editingValue, setEditingValue] = useState({ name: '', description: '' });
-  const [showConfirmDialog, setShowConfirmDialog] = useState({ show: false, type: '', id: '', name: '', onConfirm: null });
   const [notification, setNotification] = useState({ show: false, message: "", type: "success" });
   const [newProduct, setNewProduct] = useState({
     title: "",
@@ -215,10 +204,10 @@ const AdminPanel = () => {
   }, {});
 
   // Variaciones nuevas
-  const addVariation = () => setVariations([...variations, { nombre: "", precio: 0 }]);
+  const addVariation = () => setVariations([...variations, { size: "", price: 0 }]);
   const updateVariation = (i, field, value) => {
     const newVars = [...variations];
-    newVars[i][field] = field === "precio" ? Number(value) : value;
+    newVars[i][field] = field === "price" ? Number(value) : value;
     setVariations(newVars);
   };
   const removeVariation = (i) => {
@@ -227,262 +216,15 @@ const AdminPanel = () => {
     setVariations(newVars);
   };
 
-  // Función para manejar la edición de un ítem en línea
-  const handleInlineEdit = (item, type) => {
-    setEditingItem({ ...item, type });
-    setEditingValue({
-      name: item.name,
-      description: item.description || ''
-    });
-  };
-
-  // Guardar cambios de la edición en línea
-  const saveInlineEdit = async () => {
-    if (!editingItem) return;
-
-    try {
-      const url = editingItem.type === 'category' 
-        ? `${API_CAT}/${editingItem._id}`
-        : `${API_SUB}/${editingItem._id}`;
-      
-      const response = await fetch(url, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: editingValue.name.trim(),
-          description: editingValue.description.trim(),
-          ...(editingItem.type === 'subcategory' && { categoryId: editingItem.categoryId })
-        }),
-        credentials: 'include'
-      });
-
-      if (response.ok) {
-        if (editingItem.type === 'category') {
-          await fetchCategories();
-          // Actualizar la categoría seleccionada si se está editando
-          if (newProduct.categoryId === editingItem._id) {
-            setNewProduct({ ...newProduct, categoryName: editingValue.name });
-          }
-        } else {
-          await fetchSubcategories();
-          // Actualizar la subcategoría seleccionada si se está editando
-          if (newProduct.subcategoryId === editingItem._id) {
-            setNewProduct({ ...newProduct, subcategoryName: editingValue.name });
-          }
-        }
-        showNotification(`${editingItem.type === 'category' ? 'Categoría' : 'Subcategoría'} actualizada exitosamente`);
-        setEditingItem(null);
-      } else {
-        const error = await response.json();
-        throw new Error(error.message || 'Error al actualizar');
-      }
-    } catch (error) {
-      showNotification(error.message || 'Error al actualizar', 'error');
-    }
-  };
-
-  // Eliminar un ítem con confirmación
-  const confirmDelete = (id, name, type, onConfirm) => {
-    setShowConfirmDialog({
-      show: true,
-      type,
-      id,
-      name,
-      onConfirm
-    });
-  };
-
+  
   // Función para mostrar notificaciones
   const showNotification = (message, type = 'success') => {
     setNotification({ show: true, message, type });
     setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 3000);
   };
 
-  // Iniciar edición de categoría
-  const startEditingCategory = (category) => {
-    setEditingCategory(category);
-    setNewCategory({
-      name: category.name,
-      description: category.description || ''
-    });
-  };
-
-  // Iniciar edición de subcategoría
-  const startEditingSubcategory = (subcategory) => {
-    setEditingSubcategory(subcategory);
-    setNewSubcategory({
-      name: subcategory.name,
-      description: subcategory.description || '',
-      categoryId: subcategory.categoryId._id || subcategory.categoryId
-    });
-  };
-
-  // Manejar eliminación de categoría
-  const handleDeleteCategory = async (id) => {
-    try {
-      const response = await fetch(`${API_CAT}/${id}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        await fetchCategories();
-        showNotification('Categoría eliminada exitosamente');
-      } else {
-        const error = await response.json();
-        throw new Error(error.message || 'Error al eliminar categoría');
-      }
-    } catch (error) {
-      showNotification(error.message || 'Error al eliminar categoría', 'error');
-    } finally {
-      setShowDeleteConfirm({ show: false, type: '', id: '', name: '' });
-    }
-  };
-
-  // Manejar eliminación de subcategoría
-  const handleDeleteSubcategory = async (id) => {
-    try {
-      const response = await fetch(`${API_SUB}/${id}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        await fetchSubcategories();
-        showNotification('Subcategoría eliminada exitosamente');
-      } else {
-        const error = await response.json();
-        throw new Error(error.message || 'Error al eliminar subcategoría');
-      }
-    } catch (error) {
-      showNotification(error.message || 'Error al eliminar subcategoría', 'error');
-    } finally {
-      setShowDeleteConfirm({ show: false, type: '', id: '', name: '' });
-    }
-  };
-
-  // Manejar actualización de categoría
-  const handleUpdateCategory = async (e) => {
-    e.preventDefault();
-    if (!editingCategory) return;
-    
-    try {
-      const response = await fetch(`${API_CAT}/${editingCategory._id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: newCategory.name.trim(),
-          description: newCategory.description.trim()
-        }),
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        setEditingCategory(null);
-        setNewCategory({ name: '', description: '' });
-        await fetchCategories();
-        showNotification('Categoría actualizada exitosamente');
-      } else {
-        const error = await response.json();
-        throw new Error(error.message || 'Error al actualizar categoría');
-      }
-    } catch (error) {
-      showNotification(error.message || 'Error al actualizar categoría', 'error');
-    }
-  };
-
-  // Manejar creación de categoría
-  const handleCreateCategory = async (e) => {
-    e.preventDefault();
-    
-    try {
-      const response = await fetch(API_CAT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: newCategory.name.trim(),
-          description: newCategory.description.trim()
-        }),
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        setNewCategory({ name: '', description: '' });
-        await fetchCategories();
-        showNotification('Categoría creada exitosamente');
-      } else {
-        const error = await response.json();
-        throw new Error(error.message || 'Error al crear categoría');
-      }
-    } catch (error) {
-      showNotification(error.message || 'Error al crear categoría', 'error');
-    }
-  };
-
-  // Manejar actualización de subcategoría
-  const handleUpdateSubcategory = async (e) => {
-    e.preventDefault();
-    if (!editingSubcategory || !newSubcategory.categoryId) return;
-    
-    try {
-      const response = await fetch(`${API_SUB}/${editingSubcategory._id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: newSubcategory.name.trim(),
-          description: newSubcategory.description.trim(),
-          categoryId: newSubcategory.categoryId
-        }),
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        setEditingSubcategory(null);
-        setNewSubcategory({ name: '', description: '', categoryId: '' });
-        await fetchSubcategories();
-        showNotification('Subcategoría actualizada exitosamente');
-      } else {
-        const error = await response.json();
-        throw new Error(error.message || 'Error al actualizar subcategoría');
-      }
-    } catch (error) {
-      showNotification(error.message || 'Error al actualizar subcategoría', 'error');
-    }
-  };
-
-  // Manejar creación de subcategoría
-  const handleCreateSubcategory = async (e) => {
-    e.preventDefault();
-    if (!newSubcategory.categoryId) {
-      showNotification('Por favor seleccione una categoría', 'error');
-      return;
-    }
-    
-    try {
-      const response = await fetch(API_SUB, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: newSubcategory.name.trim(),
-          description: newSubcategory.description.trim(),
-          categoryId: newSubcategory.categoryId
-        }),
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        setNewSubcategory({ name: '', description: '', categoryId: '' });
-        await fetchSubcategories();
-        showNotification('Subcategoría creada exitosamente');
-      } else {
-        const error = await response.json();
-        throw new Error(error.message || 'Error al crear subcategoría');
-      }
-    } catch (error) {
-      showNotification(error.message || 'Error al crear subcategoría', 'error');
-    }
-  };
-
+  
+  
   // Manejar creación de producto
   const handleCreateProduct = async (e) => {
     e.preventDefault();
@@ -537,189 +279,14 @@ const AdminPanel = () => {
         const error = await response.json();
         throw new Error(error.message || 'Error al crear producto');
       }
-    } catch (error) {
+      } catch (error) {
       showNotification(error.message || 'Error al crear producto', 'error');
     }
   };
 
-  // Cancelar edición
-  const cancelEdit = () => {
-    setEditingCategory(null);
-    setEditingSubcategory(null);
-    setEditingItem(null);
-    setNewCategory({ name: '', description: '' });
-    setNewSubcategory({ name: '', description: '', categoryId: '' });
-  };
-
-  // Manejar clic derecho para mostrar menú contextual
-  const handleContextMenu = (e, type, item) => {
-    e.preventDefault();
-    setContextMenu({
-      show: true,
-      x: e.clientX,
-      y: e.clientY,
-      type,
-      item
-    });
-  };
-
-  // Renderizar menú contextual
-  const renderContextMenu = () => {
-    if (!contextMenu.show) return null;
-    
-    const handleAction = (action) => {
-      if (action === 'delete') {
-        setShowDeleteConfirm({
-          show: true,
-          type: contextMenu.type,
-          id: contextMenu.item._id,
-          name: contextMenu.item.name
-        });
-      } else if (action === 'edit') {
-        if (contextMenu.type === 'category') {
-          startEditingCategory(contextMenu.item);
-        } else if (contextMenu.type === 'subcategory') {
-          startEditingSubcategory(contextMenu.item);
-        }
-      }
-      setContextMenu({ ...contextMenu, show: false });
-    };
-
-    return (
-      <div 
-        className="context-menu" 
-        style={{ left: contextMenu.x, top: contextMenu.y }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="context-menu-item" onClick={() => handleAction('edit')}>
-          <span>✏️</span> Editar
-        </div>
-        <div className="context-menu-item delete" onClick={() => handleAction('delete')}>
-          <span>🗑️</span> Eliminar
-        </div>
-      </div>
-    );
-  };
-
-  // Renderizar formulario de edición en línea
-  const renderInlineEditForm = () => {
-    if (!editingItem) return null;
-    
-    return (
-      <div className="inline-edit-form">
-        <input
-          type="text"
-          value={editingValue.name}
-          onChange={(e) => setEditingValue({...editingValue, name: e.target.value})}
-          placeholder={`Nombre de ${editingItem.type === 'category' ? 'la categoría' : 'la subcategoría'}`}
-          required
-        />
-        <textarea
-          value={editingValue.description}
-          onChange={(e) => setEditingValue({...editingValue, description: e.target.value})}
-          placeholder={`Descripción (opcional)`}
-          rows="2"
-        />
-        <div className="inline-edit-form-buttons">
-          <button 
-            type="button" 
-            className="btn-secondary"
-            onClick={() => setEditingItem(null)}
-          >
-            Cancelar
-          </button>
-          <button 
-            type="button" 
-            className="btn-primary"
-            onClick={saveInlineEdit}
-          >
-            Guardar
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  // Renderizar diálogo de confirmación
-  const renderConfirmDialog = () => {
-    if (!showDeleteConfirm.show && !showConfirmDialog.show) return null;
-    
-    // Diálogo de confirmación para eliminación desde selectores
-    if (showConfirmDialog.show) {
-      return (
-        <div className="overlay" onClick={() => setShowConfirmDialog({ ...showConfirmDialog, show: false })}>
-          <div className="select-confirm-dialog" onClick={e => e.stopPropagation()}>
-            <p>
-              ¿Estás seguro de que deseas eliminar {showConfirmDialog.type === 'category' ? 'la categoría' : 'la subcategoría'}
-              <strong> "{showConfirmDialog.name}"</strong>? Esta acción no se puede deshacer.
-            </p>
-            <div className="select-confirm-dialog-buttons">
-              <button 
-                className="btn-secondary"
-                onClick={() => setShowConfirmDialog({ ...showConfirmDialog, show: false })}
-              >
-                Cancelar
-              </button>
-              <button 
-                className="btn-danger"
-                onClick={async () => {
-                  if (showConfirmDialog.onConfirm) {
-                    await showConfirmDialog.onConfirm();
-                  }
-                  setShowConfirmDialog({ ...showConfirmDialog, show: false });
-                }}
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    // Diálogo de confirmación original
-    if (showDeleteConfirm.show) {
-
-    const handleConfirm = async () => {
-      if (showDeleteConfirm.type === 'category') {
-        await handleDeleteCategory(showDeleteConfirm.id);
-      } else if (showDeleteConfirm.type === 'subcategory') {
-        await handleDeleteSubcategory(showDeleteConfirm.id);
-      }
-    };
-
-    return (
-      <div className="confirm-dialog" onClick={() => setShowDeleteConfirm({ ...showDeleteConfirm, show: false })}>
-        <div className="confirm-dialog-content" onClick={(e) => e.stopPropagation()}>
-          <p className="confirm-dialog-message">
-            ¿Estás seguro de que deseas eliminar {showDeleteConfirm.type === 'category' ? 'la categoría' : 'la subcategoría'}
-            <strong> "{showDeleteConfirm.name}"</strong>? Esta acción no se puede deshacer.
-          </p>
-          <div className="confirm-dialog-buttons">
-            <button 
-              className="btn-secondary"
-              onClick={() => setShowDeleteConfirm({ ...showDeleteConfirm, show: false })}
-            >
-              Cancelar
-            </button>
-            <button 
-              className="btn-danger"
-              onClick={handleConfirm}
-            >
-              Eliminar
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return null;
-};
-
 // Renderizar el componente
 return (
-  <div className="admin-panel" onClick={() => setContextMenu({ ...contextMenu, show: false })}>
+  <div className="admin-panel">
     <h1>Panel de Administración</h1>
       {notification.show && (
         <div className={`notification ${notification.type}`}>
@@ -727,166 +294,6 @@ return (
           <button onClick={() => setNotification({ ...notification, show: false })}>×</button>
         </div>
       )}
-
-      {/* Menú contextual */}
-      {renderContextMenu()}
-
-      {/* Diálogo de confirmación */}
-      {renderConfirmDialog()}
-      
-      {/* Formulario de edición en línea */}
-      {renderInlineEditForm()}
-
-      <div className="taxonomies">
-        <h2>Categorías y Subcategorías</h2>
-        
-        {/* Lista de categorías existentes */}
-        <div className="categories-list" style={{ marginBottom: '30px' }}>
-          <h3>Categorías existentes</h3>
-          {categories.length === 0 ? (
-            <p>No hay categorías creadas</p>
-          ) : (
-            <div className="items-grid">
-              {categories.map((category) => (
-                <div 
-                  key={category._id}
-                  className="category-item"
-                  onContextMenu={(e) => handleContextMenu(e, 'category', category)}
-                >
-                  <div className="item-name">{category.name}</div>
-                  <div className="item-description">{category.description || 'Sin descripción'}</div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Lista de subcategorías existentes */}
-        <div className="subcategories-list" style={{ marginBottom: '30px' }}>
-          <h3>Subcategorías existentes</h3>
-          {subcategories.length === 0 ? (
-            <p>No hay subcategorías creadas</p>
-          ) : (
-            <div className="items-grid">
-              {subcategories.map((subcategory) => {
-                const category = categories.find((c) => c._id === subcategory.categoryId);
-                return (
-                  <div 
-                    key={subcategory._id}
-                    className="subcategory-item"
-                    onContextMenu={(e) => handleContextMenu(e, 'subcategory', subcategory)}
-                  >
-                    <div className="item-name">{subcategory.name}</div>
-                    <div className="item-description">{subcategory.description || 'Sin descripción'}</div>
-                    <div className="item-category">Categoría: {category ? category.name : 'Sin categoría'}</div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        <div className="taxo-forms">
-          <div className="form-container">
-            <h3>{editingCategory ? 'Editar Categoría' : 'Nueva Categoría'}</h3>
-            <form 
-              onSubmit={editingCategory ? handleUpdateCategory : handleCreateCategory} 
-              className="admin-form"
-            >
-              <div className="form-group">
-                <label>Nombre de la categoría</label>
-                <input 
-                  type="text" 
-                  value={newCategory.name}
-                  onChange={(e) => setNewCategory({...newCategory, name: e.target.value})}
-                  placeholder="Ej: Cafés" 
-                  required 
-                />
-              </div>
-              <div className="form-group">
-                <label>Descripción (opcional)</label>
-                <textarea 
-                  value={newCategory.description}
-                  onChange={(e) => setNewCategory({...newCategory, description: e.target.value})}
-                  placeholder="Describe brevemente esta categoría"
-                  rows="3"
-                />
-              </div>
-              <div className="form-actions">
-                {editingCategory && (
-                  <button 
-                    type="button" 
-                    className="btn-secondary"
-                    onClick={cancelEdit}
-                  >
-                    Cancelar
-                  </button>
-                )}
-                <button type="submit" className="btn-primary">
-                  {editingCategory ? 'Actualizar categoría' : 'Crear categoría'}
-                </button>
-              </div>
-            </form>
-          </div>
-
-          <div className="form-container">
-            <h3>{editingSubcategory ? 'Editar Subcategoría' : 'Nueva Subcategoría'}</h3>
-            <form 
-              onSubmit={editingSubcategory ? handleUpdateSubcategory : handleCreateSubcategory} 
-              className="admin-form"
-            >
-              <div className="form-group">
-                <label>Categoría padre</label>
-                <select 
-                  value={newSubcategory.categoryId}
-                  onChange={(e) => setNewSubcategory({...newSubcategory, categoryId: e.target.value})}
-                  required
-                >
-                  <option value="" disabled>Seleccione una categoría</option>
-                  {categories.map((c) => (
-                    <option key={c._id} value={c._id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Nombre de la subcategoría</label>
-                <input 
-                  type="text" 
-                  value={newSubcategory.name}
-                  onChange={(e) => setNewSubcategory({...newSubcategory, name: e.target.value})}
-                  placeholder="Ej: Cafés Fríos" 
-                  required 
-                />
-              </div>
-              <div className="form-group">
-                <label>Descripción (opcional)</label>
-                <textarea 
-                  value={newSubcategory.description}
-                  onChange={(e) => setNewSubcategory({...newSubcategory, description: e.target.value})}
-                  placeholder="Describe brevemente esta subcategoría"
-                  rows="3"
-                />
-              </div>
-              <div className="form-actions">
-                {editingSubcategory && (
-                  <button 
-                    type="button" 
-                    className="btn-secondary"
-                    onClick={cancelEdit}
-                  >
-                    Cancelar
-                  </button>
-                )}
-                <button type="submit" className="btn-primary">
-                  {editingSubcategory ? 'Actualizar subcategoría' : 'Crear subcategoría'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
 
       <div className="create-product-form">
         <h2>Crear nuevo producto</h2>
@@ -1265,11 +672,11 @@ return (
                         >
                           <input
                             type="text"
-                            placeholder="Nombre variación"
-                            value={v.nombre}
+                            placeholder="Tamaño variación"
+                            value={v.size}
                             onChange={(e) => {
                               const nuevasVar = [...editedProduct.variations];
-                              nuevasVar[i] = { ...nuevasVar[i], nombre: e.target.value };
+                              nuevasVar[i] = { ...nuevasVar[i], size: e.target.value };
                               setEditedProduct((prev) => ({ ...prev, variations: nuevasVar }));
                             }}
                             className="edit-input"
@@ -1278,10 +685,10 @@ return (
                           <input
                             type="number"
                             placeholder="Precio"
-                            value={v.precio}
+                            value={v.price}
                             onChange={(e) => {
                               const nuevasVar = [...editedProduct.variations];
-                              nuevasVar[i] = { ...nuevasVar[i], precio: Number(e.target.value) };
+                              nuevasVar[i] = { ...nuevasVar[i], price: Number(e.target.value) };
                               setEditedProduct((prev) => ({ ...prev, variations: nuevasVar }));
                             }}
                             className="edit-input narrow"
@@ -1303,7 +710,7 @@ return (
                         type="button"
                         className="btn-variation"
                         onClick={() => {
-                          const nuevasVar = [...(editedProduct.variations || []), { nombre: "", precio: 0 }];
+                          const nuevasVar = [...(editedProduct.variations || []), { size: "", price: 0 }];
                           setEditedProduct((prev) => ({ ...prev, variations: nuevasVar }));
                         }}
                         style={{ marginTop: "8px" }}
@@ -1334,7 +741,7 @@ return (
                       <ul>
                         {p.variations.map((v, i) => (
                           <li key={i}>
-                            {v.nombre} - ${v.precio}
+                            {v.size} - ${v.price}
                           </li>
                         ))}
                       </ul>

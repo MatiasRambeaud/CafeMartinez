@@ -131,9 +131,11 @@ export default function MostrarProductos() {
             const group = productosPorJerarquia[c._id] || { noSub: [], bySub: {} };
             const subcatsDeCat = subcategorias.filter((s) => String(s.categoryId) === String(c._id));
             const tieneSubcats = subcatsDeCat.length > 0;
+            
             return (
               <section key={c._id} id={`cat-${c._id}`} className="categoria-section">
                 <h2 className="categoria-titulo">{c.name}</h2>
+                
                 {!tieneSubcats && (
                   <div className="menu-grid">
                     {group.noSub.map((producto) => (
@@ -141,6 +143,7 @@ export default function MostrarProductos() {
                     ))}
                   </div>
                 )}
+                
                 {tieneSubcats && (
                   <div className="menu-grid">
                     {subcatsDeCat.map((s) => {

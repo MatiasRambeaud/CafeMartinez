@@ -103,6 +103,13 @@
     margin: 0;
 }
 
+.producto-precio.combo-item {
+    color: #d4af37;
+    font-weight: 700;
+    text-align: center;
+    font-size: 1.4rem;
+}
+
 .producto-variaciones-horizontal {
     display: flex;
     flex-direction: row;

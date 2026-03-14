@@ -24,7 +24,10 @@ const schema = new mongoose.Schema({
         type: Array,
         default: null
     }
-})
+});
+
+// Ensure uniqueness by logical identity: title + category + subcategory
+schema.index({ title: 1, categoryId: 1, subcategoryId: 1 }, { unique: true });
 
 const productsModel = mongoose.model(collection, schema);
 
